@@ -1,20 +1,12 @@
+# 해답 듣고 DP로 풀기
+
 N = int(input())
 lst = [list(map(int, input().split())) for _ in range(N)]
 
-result = 0
+dp = [0] * (N + 1)
 
-def dfs(level, total):
-    global result
+for n in range(N - 1, -1, -1):
+    if n + lst[n][0] <= N:
+        dp[n] = lst[n][1] + max(dp[n + lst[n][0]:])
     
-    if level == N:
-        result = max(total, result)
-        return
-
-    if level > N: return
-    
-    dfs(level + 1, total)
-    dfs(level + lst[level][0], total + lst[level][1])
-
-dfs(0, 0)
-
-print(result)
+print(max(dp))
