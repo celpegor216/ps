@@ -6,7 +6,8 @@
 # ex) 홀수 그룹 선택하는 dp를 어떻게 하지?
 
 # 투 포인터였음,,,
-# 
+# 해답: https://velog.io/@harryyyyy/%EB%B0%B1%EC%A4%80-22862-%EA%B0%80%EC%9E%A5-%EA%B8%B4-%EC%A7%9D%EC%88%98-%EC%97%B0%EC%86%8D%ED%95%9C-%EB%B6%80%EB%B6%84%EC%88%98%EC%97%B4-%ED%88%AC%ED%8F%AC%EC%9D%B8%ED%84%B0-python-%ED%8C%8C%EC%9D%B4%EC%8D%AC
+
 
 N, K = map(int, input().split())
 lst = list(map(int, input().split()))
