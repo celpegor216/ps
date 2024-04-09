@@ -1,5 +1,5 @@
 # 메모리 초과
-# 해답: 
+# 해답: https://cobokjang.tistory.com/16
 
 from collections import deque
 import heapq
