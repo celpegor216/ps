@@ -1,28 +1,18 @@
 lst = [int(input()) for _ in range(9)]
 
-used = [0] * 9
-answer = []
+result = []
+total = sum(lst)
 
-def dfs(level):
-    global answer
-    if answer:
-        return
+for i in range(8):
+    if result:
+        break
 
-    if level == 2:
-        result = [lst[i] for i in range(9) if not used[i]]
+    for j in range(i + 1, 9):
+        if lst[i] + lst[j] == total - 100:
+            result = [i, j]
+            break
 
-        if sum(result) == 100:
-            answer = sorted(result)
-        
-        return
-    
-    for i in range(9):
-        if not used[i]:
-            used[i] = 1
-            dfs(level + 1)
-            used[i] = 0
+result = sorted([lst[n] for n in range(9) if n not in result])
 
-dfs(0)
-
-for item in answer:
+for item in result:
     print(item)
