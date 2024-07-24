@@ -1,33 +1,35 @@
-N = int(input())    # 이동하려는 채널
-M = int(input())    # 고장난 버튼 수
-if M != 0:
-    disable = list(map(int, input().split()))    # 고장난 버튼 배열
-    able = [x for x in range(10) if x not in disable]  # 가능한 버튼 배열
-else:
-    able = [x for x in range(10)]
+from collections import deque
 
-length = len(str(N))    # 이동하려는 채널의 글자 수
-prox = 100
+N = int(input())
+M = int(input())
+buttons = set(x for x in range(10))
+if M:
+    broken = set(map(int, input().split()))
+    buttons -= broken
 
-def dfs(level, num):
-    global prox
+maxv = 10 ** 6
 
-    # 이동하려는 채널과 차이가 더 적은 수를 prox에 저장
-    if abs(num - N) + level < abs(prox - N) + len(str(prox)):
-        prox = num
+q = deque()
+used = [0] * (maxv + 1)
 
-    if level == length:
-        return
+result = abs(100 - N)
 
-    if not(level == 0 and num == 0):
-        for n in able:
-            dfs(level + 1, num * 10 + n)
+for n in buttons:
+    q.append((n, 1))
+    used[n] = 1
 
-# 숫자 버튼을 눌러서 숫자를 새로 만드는 경우
-for item in able:
-    dfs(0, item)
+while q:
+    now, cnt = q.popleft()
 
-# +, -를 눌러서 이동만 하는 경우
-move = abs(N - 100)
+    result = min(result, abs(now - N) + cnt)
 
-print(min(move, abs(prox - N) + len(str(prox))))
+    if now == N:
+        continue
+
+    for n in buttons:
+        tmp = now * 10 + n
+        if tmp <= maxv and not used[tmp]:
+            q.append((tmp, cnt + 1))
+            used[tmp] = 1
+
+print(result)
