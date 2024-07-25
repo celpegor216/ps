@@ -1,35 +1,34 @@
-lst = [list(map(int, input().split())) for _ in range(19)]
+N = 19
 
-answer = []
+lst = [list(map(int, input().split())) for _ in range(N)]
 
-def solution():
-    global answer
-    for i in range(19):
-        for j in range(19):
-            if lst[i][j]:
-                for dy, dx in ((0, 1), (1, 0), (1, 1), (-1, 1)):
-                    ny, nx = i - dy, j - dx
-                    if not (0 <= ny < 19 and 0 <= nx < 19) or (0 <= ny < 19 and 0 <= nx < 19 and lst[ny][nx] != lst[i][j]):
-                        ny, nx = i + dy, j + dx
-                        flag = 0
-                        for k in range(4):
-                            if 0 <= ny < 19 and 0 <= nx < 19:
-                                if lst[ny][nx] != lst[i][j]:
-                                    flag = 1
-                                    break
-                                ny += dy
-                                nx += dx
-                            else:
-                                flag = 1
-                                break
-                        if not flag and (not (0 <= ny < 19 and 0 <= nx < 19) or ( 0 <= ny < 19 and 0 <= nx < 19 and lst[ny][nx] != lst[i][j])):
-                            answer = [i, j]
-                            return
+def check():
+    for i in range(N):
+        for j in range(N):
+            if not lst[i][j]:
+                continue
 
-solution()
+            for dy, dx in ((-1, 1), (0, 1), (1, 1), (1, 0)):
+                by, bx = i - dy, j - dx
 
-if not answer:
-    print(0)
-else:
-    print(lst[answer[0]][answer[1]])
-    print(answer[0] + 1, answer[1] + 1)
+                if 0 <= by < N and 0 <= bx < N and lst[by][bx] == lst[i][j]:
+                    continue
+
+                ny, nx = i + dy, j + dx
+                cnt = 1
+
+                while 0 <= ny < N and 0 <= nx < N and lst[ny][nx] == lst[i][j]:
+                    cnt += 1
+                    ny += dy
+                    nx += dx
+
+                if cnt == 5:
+                    return lst[i][j], i, j
+
+    return 0, 0, 0
+
+side, y, x = check()
+
+print(side)
+if side:
+    print(y + 1, x + 1)
