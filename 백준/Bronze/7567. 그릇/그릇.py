@@ -1,13 +1,11 @@
-s = input()
+S = input()
+N = len(S)
 
-now = s[0]
 result = 10
-
-for i in range(1, len(s)):
-    if s[i] == now:
+for n in range(1, N):
+    if S[n] == S[n - 1]:
         result += 5
     else:
         result += 10
-        now = s[i]
 
 print(result)
