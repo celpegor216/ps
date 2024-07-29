@@ -1,19 +1,18 @@
 N, Q = map(int, input().split())
-lst_n = list(map(int, input().split()))
-lst_q = list(map(int, input().split()))
-
-lst = [0] * N
+lst = list(map(int, input().split()))
+lst_sum = [0] * N
 
 for n in range(N):
-    lst[n] = lst_n[n % N] * lst_n[(n + 1) % N] * lst_n[(n + 2) % N] * lst_n[(n + 3) % N]
+    lst_sum[n] = lst[n] * lst[(n + 1) % N] * lst[(n + 2) % N] * lst[(n + 3) % N]
 
-total = sum(lst)
+total = sum(lst_sum)
 
-for q in lst_q:
-    q -= 1
-    
+queries = list(map(int, input().split()))
+
+for query in queries:
+    query -= 1
+
     for i in range(4):
-        lst[(q - i) % N] *= -1
-        total += lst[(q - i) % N] * 2
-    
+        lst_sum[query - i] *= -1
+        total += lst_sum[query - i] * 2
     print(total)
