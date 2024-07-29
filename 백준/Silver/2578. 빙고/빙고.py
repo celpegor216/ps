@@ -1,41 +1,30 @@
 N = 5
-
 lst = [list(map(int, input().split())) for _ in range(N)]
-call = []
 
+calls = []
 for _ in range(N):
-    call += list(map(int, input().split()))
+    calls += list(map(int, input().split()))
 
-used = [[0] * N for _ in range(N)]
+horizontal_cnt = [0] * 5
+vertical_cnt = [0] * 5
+cross_cnt = [0] * 2
 
-for n in range(N ** 2):
-    now = call[n]
+def check(call):
+    for n in range(N):
+        for m in range(N):
+            if lst[n][m] == call:
+                horizontal_cnt[n] += 1
+                vertical_cnt[m] += 1
 
-    for i in range(N):
-        for j in range(N):
-            if lst[i][j] == now:
-                used[i][j] = 1
+                if n == m:
+                    cross_cnt[0] += 1
+                if n + m == N - 1:
+                    cross_cnt[1] += 1
+                return
 
-    cnt = 0
+for i in range(N ** 2):
+    check(calls[i])
 
-    # 가로
-    for i in range(N):
-        if sum(used[i]) == N:
-            cnt += 1
-
-    # 세로
-    for j in range(N):
-        if sum(used[y][j] for y in range(N)) == N:
-            cnt += 1
-
-    # 왼쪽위 - 오른쪽아래 대각선
-    if sum(used[i][i] for i in range(N)) == N:
-        cnt += 1
-
-    # 왼쪽아래 - 오른쪽위 대각선
-    if sum(used[i][N - i - 1] for i in range(N)) == N:
-        cnt += 1
-
-    if cnt >= 3:
-        print(n + 1)
+    if horizontal_cnt.count(N) + vertical_cnt.count(N) + cross_cnt.count(N) >= 3:
+        print(i + 1)
         break
