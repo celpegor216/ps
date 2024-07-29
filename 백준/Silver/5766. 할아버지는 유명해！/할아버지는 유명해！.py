@@ -4,27 +4,21 @@ while 1:
     if N == M == 0:
         break
 
-    dic = dict()
+    bucket = dict()
 
-    for n in range(N):
-        tmp = list(map(int, input().split()))
+    for _ in range(N):
+        tmp = map(int, input().split())
+        for key in tmp:
+            bucket[key] = bucket.get(key, 0) + 1
 
-        for item in tmp:
-            if dic.get(item):
-                dic[item] += 1
-            else:
-                dic[item] = 1
-    
-    lst = list(dic.items())
-    lst.sort(key=lambda x: (-x[1], x[0]))
-
-    second = lst[1][1]
+    bucket = sorted(bucket.items(), key=lambda x: (-x[1], x[0]))
+    maxv = bucket[1][1]
     result = []
 
-    for item in lst:
-        if item[1] == second:
-            result.append(item[0])
-        elif item[1] < second:
+    for idx, v in bucket[1:]:
+        if maxv == v:
+            result.append(idx)
+        else:
             break
-    
-    print(*sorted(result))
+
+    print(*result)
