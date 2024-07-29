@@ -1,19 +1,16 @@
-# 힌트: 스택 사용
-
 N = int(input())
 lst = list(map(int, input().split()))
 
-stack = [lst[-1]]
 result = [-1] * N
+stack = []
 
-for n in range(N - 2, -1, -1):
-    while stack:
-        if stack[-1] > lst[n]:
-            result[n] = stack[-1]
-            break
-        else:
-            stack.pop()
-    
-    stack.append(lst[n])
+for n in range(N - 1, -1, -1):
+    while stack and lst[stack[-1]] <= lst[n]:
+        stack.pop()
+
+    if stack:
+        result[n] = lst[stack[-1]]
+
+    stack.append(n)
 
 print(*result)
