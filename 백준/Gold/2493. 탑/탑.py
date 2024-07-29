@@ -1,16 +1,12 @@
 N = int(input())
 lst = list(map(int, input().split()))
 
+result = [0] * N
 stack = []
 
-result = [0] * N
-
 for n in range(N - 1, -1, -1):
-    while stack:
-        if lst[stack[-1]] < lst[n]:
-            result[stack.pop()] = n + 1
-        else:
-            break
+    while stack and lst[stack[-1]] < lst[n]:
+        result[stack.pop()] = n + 1
 
     stack.append(n)
 
