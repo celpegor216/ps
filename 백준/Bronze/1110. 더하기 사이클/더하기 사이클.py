@@ -1,13 +1,15 @@
 N = int(input())
 
-cnt = 0
-now = N
+used = [0] * 100
+used[N] = 1
+cnt = 1
 
 while 1:
-    cnt += 1
-    now = (now // 10 + now % 10) % 10 + (now % 10) * 10
+    N = (N % 10) * 10 + (N // 10 + N % 10) % 10
 
-    if now == N:
+    if used[N]:
         break
+
+    cnt += 1
 
 print(cnt)
