@@ -1,41 +1,37 @@
 from collections import deque
 
 M, N = map(int, input().split())
-
 lst = [list(map(int, input().split())) for _ in range(N)]
+
+q = deque()
 used = [[0] * M for _ in range(N)]
+cnt = 0
 
-def bfs():
-    q = deque()
-    max_c = 0
+for n in range(N):
+    for m in range(M):
+        if lst[n][m] == 1:
+            q.append((n, m))
+            used[n][m] = 1
+        elif lst[n][m] == 0:
+            cnt += 1
 
-    for i in range(N):
-        for j in range(M):
-            if lst[i][j] == 1:
-                q.append((i, j, 0))
-
-    while q:
-        nowy, nowx, nowc = q.popleft()
+result = -1
+while q:
+    length = len(q)
+    for _ in range(length):
+        y, x = q.popleft()
 
         for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
-            ny, nx = nowy + dy, nowx + dx
+            ny, nx = y + dy, x + dx
+
             if 0 <= ny < N and 0 <= nx < M and not used[ny][nx] and lst[ny][nx] == 0:
+                q.append((ny, nx))
                 used[ny][nx] = 1
-                q.append((ny, nx, nowc + 1))
-                max_c = nowc + 1
+                cnt -= 1
 
-    result = max_c
+    result += 1
 
-    for i in range(N):
-        if result == -1:
-            break
+if cnt:
+    result = -1
 
-        for j in range(M):
-            # 안 익은 토마토인데 익지 않은 경우
-            if lst[i][j] == 0 and used[i][j] == 0:
-                result = -1
-                break
-
-    return result
-
-print(bfs())
+print(result)
