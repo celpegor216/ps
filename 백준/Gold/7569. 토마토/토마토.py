@@ -1,45 +1,33 @@
 from collections import deque
 
 M, N, H = map(int, input().split())
-
 lst = [[list(map(int, input().split())) for _ in range(N)] for _ in range(H)]
+
+q = deque()
 used = [[[0] * M for _ in range(N)] for _ in range(H)]
-result = 0
 
-def bfs():
-    global result
+cnt = 0
+for i in range(H):
+    for j in range(N):
+        for k in range(M):
+            if lst[i][j][k] == 1:
+                q.append((i, j, k))
+                used[i][j][k] = 1
+            elif not lst[i][j][k]:
+                cnt += 1
 
-    q = deque()
+while q:
+    i, j, k = q.popleft()
 
-    for h in range(H):
-        for n in range(N):
-            for m in range(M):
-                if lst[h][n][m] == 1:
-                    q.append((h, n, m, 0))
+    for di, dj, dk in ((0, 0, 1), (0, 1, 0), (0, 0, -1), (0, -1, 0), (1, 0, 0), (-1, 0, 0)):
+        ni, nj, nk = i + di, j + dj, k + dk
 
-    while q:
-        nowh, nown, nowm, nowc = q.popleft()
+        if 0 <= ni < H and 0 <= nj < N and 0 <= nk < M and not used[ni][nj][nk] and not lst[ni][nj][nk]:
+            cnt -= 1
+            q.append((ni, nj, nk))
+            used[ni][nj][nk] = used[i][j][k] + 1
 
-        for dh, dn, dm in ((0, 0, 1), (0, 1, 0), (0, 0, -1), (0, -1, 0), (-1, 0, 0), (1, 0, 0)):
-            nh, nn, nm = nowh + dh, nown + dn, nowm + dm
-            if 0 <= nh < H and 0 <= nn < N and 0 <= nm < M and not used[nh][nn][nm] \
-                and lst[nh][nn][nm] == 0:
-                used[nh][nn][nm] = 1
-                q.append((nh, nn, nm, nowc + 1))
-                if nowc + 1 > result:
-                    result = nowc + 1
-
-bfs()
-
-for h in range(H):
-    if result == -1:
-        break
-    for n in range(N):
-        if result == -1:
-            break
-        for m in range(M):
-            if lst[h][n][m] == 0 and used[h][n][m] == 0:
-                result = -1
-                break
-
-print(result)
+if cnt:
+    print(-1)
+else:
+    print(used[i][j][k] - 1)
