@@ -1,51 +1,51 @@
 N, M, K = map(int, input().split())
+stickers = []
+for _ in range(K):
+    tmp = list(map(int, input().split()))
+    tmp.append([])
+
+    for _ in range(tmp[0]):
+        tmp[-1].append(list(map(int, input().split())))
+
+    stickers.append(tmp)
+
 used = [[0] * M for _ in range(N)]
 
-def find(R, C, sticker):
-    if R > N or C > M:
-        return False
+def check(n, m, sticker):
+    for _ in range(4):
+        for i in range(N - n + 1):
+            for j in range(M - m + 1):
+                flag = 0
 
-    for i in range(N - R + 1):
-        for j in range(M - C + 1):
-            flag = 0
-
-            for r in range(R):
-                if flag:
-                    break
-
-                for c in range(C):
-                    if used[i + r][j + c] and sticker[r][c]:
-                        flag = 1
+                for k in range(n):
+                    if flag:
                         break
-            
-            if not flag:
-                for r in range(R):
-                    for c in range(C):
-                        if used[i + r][j + c] == 0 and sticker[r][c]:
-                            used[i + r][j + c] = 1
-                return True
 
-    return False
+                    for l in range(m):
+                        if sticker[k][l] and used[i + k][j + l]:
+                            flag = 1
+                            break
 
-for _ in range(K):
-    R, C = list(map(int, input().split()))
-    lst = [list(map(int, input().split())) for _ in range(R)]
+                if not flag:
+                    for k in range(n):
+                        for l in range(m):
+                            if sticker[k][l]:
+                                used[i + k][j + l] = 1
+                    return
 
-    for i in range(4):
-        if find(R, C, lst):
-            break
-        else:
-            tmp = [[] for _ in range(C)]
-            for c in range(C):
-                for r in range(R - 1, -1, -1):
-                    tmp[c].append(lst[r][c])
+        new_sticker = [[0] * n for _ in range(m)]
+        for i in range(m):
+            for j in range(n):
+                new_sticker[i][j] = sticker[n - j - 1][i]
 
-            lst = [tmp[c][:] for c in range(C)]
-            R, C = C, R
+        n, m = m, n
+        sticker = new_sticker
+
+for n, m, sticker in stickers:
+    check(n, m, sticker)
 
 result = 0
-for n in range(N):
-    for m in range(M):
-        result += used[n][m]
+for line in used:
+    result += sum(line)
 
 print(result)
