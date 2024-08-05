@@ -3,65 +3,65 @@ from collections import deque
 N, M, D = map(int, input().split())
 lst = [list(map(int, input().split())) for _ in range(N)]
 
-cnt = 0
-
-for n in range(N):
-    for m in range(M):
-        cnt += lst[n][m]
-
+used = [0] * M
 result = 0
 
-for i in range(M):
-    for j in range(i + 1, M):
-        for k in range(j + 1, M):
-            total = 0
-            c = cnt
-            board = [line[:] for line in lst]
-            X = [i, j, k]
+def dfs(start, level, positions):
+    global result
 
-            while c:
-                attack = [[] for _ in range(3)]
+    if level == 3:
+        total_attack = set()
 
-                for l in range(3):
-                    q = deque()
-                    q.append((N, X[l], 0))
-                    used = [[0] * M for _ in range(N)]
+        for n in range(N):
+            attack = set()
 
-                    while q:
-                        nowy, nowx, nowd = q.popleft()
+            for pos in positions:
+                q = deque()
+                q.append((N - n - 1, pos))
 
-                        if nowd > D or (attack[l] and nowd > attack[l][2]):
-                            break
+                tmp_used = [[0] * M for _ in range(N)]
+                tmp_used[N - n - 1][pos] = 1
 
-                        if 0 <= nowy < N and 0 <= nowx < M and board[nowy][nowx]:
-                            if not attack[l] or (attack[l] and attack[l][1] > nowx):
-                                attack[l] = [nowy, nowx, nowd]
+                ry = N
+                rx = M
+                rc = D
+
+                while q:
+                    y, x = q.popleft()
+
+                    if tmp_used[y][x] > rc:
+                        break
+
+                    if lst[y][x] == 1 and (y, x) not in total_attack:
+                        if tmp_used[y][x] < rc:
+                            ry = y
+                            rx = x
+                            rc = tmp_used[y][x]
+                        elif tmp_used[y][x] == rc and rx > x:
+                            ry = y
+                            rx = x
+                        else:
                             continue
 
-                        for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
-                            ny, nx = nowy + dy, nowx + dx
-                            if 0 <= ny < N and 0 <= nx < M and not used[ny][nx]:
-                                used[ny][nx] = 1
-                                q.append((ny, nx, nowd + 1))
-                
-                for a in attack:
-                    if a:
-                        y, x, d = a
-                        if board[y][x]:
-                            c -= 1
-                            total += 1
-                            board[y][x] = 0
-                
-                for m in range(M):
-                    c -= board[-1][m]
-                
-                new_board = [[0] * M for _ in range(N)]
+                    for dy, dx in ((0, 1), (0, -1), (-1, 0)):
+                        ny, nx = y + dy, x + dx
+                        if 0 <= ny < N - n and 0 <= nx < M and not tmp_used[ny][nx] and (ny, nx) not in total_attack:
+                            tmp_used[ny][nx] = tmp_used[y][x] + 1
+                            q.append((ny, nx))
 
-                for n in range(1, N):
-                    new_board[n] = board[n - 1][:]
-                
-                board = new_board
+                if 0 <= ry < N - n and 0 <= rx < M:
+                    attack.add((ry, rx))
 
-            result = max(result, total)
+            total_attack = total_attack.union(attack)
+        result = max(result, len(total_attack))
+        return
+
+    for i in range(start + 1, M):
+        if not used[i]:
+            used[i] = 1
+            dfs(i, level + 1, positions + [i])
+            used[i] = 0
+
+dfs(-1, 0, [])
 
 print(result)
