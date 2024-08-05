@@ -1,42 +1,46 @@
 N = int(input())
+dic = dict()
 
-tree = dict()
-for n in range(N):
-    parent, left, right = input().split()
-    tree.update({parent: (left, right)})
+def pre_order(now):
+    if now == '.':
+        return ''
 
-result_pre = ''
-result_mid = ''
-result_post = ''
+    if not dic.get(now):
+        return now
 
-def pre(now):
-    global result_pre
+    left = pre_order(dic[now][0])
+    right = pre_order(dic[now][1])
 
-    if now != '.':
-        result_pre += now
-        pre(tree[now][0])
-        pre(tree[now][1])
+    return now + left + right
 
-def mid(now):
-    global result_mid
+def in_order(now):
+    if now == '.':
+        return ''
 
-    if now != '.':
-        mid(tree[now][0])
-        result_mid += now
-        mid(tree[now][1])
+    if not dic.get(now):
+        return now
 
-def post(now):
-    global result_post
+    left = in_order(dic[now][0])
+    right = in_order(dic[now][1])
 
-    if now != '.':
-        post(tree[now][0])
-        post(tree[now][1])
-        result_post += now
+    return left + now + right
 
-pre('A')
-mid('A')
-post('A')
+def post_order(now):
+    if now == '.':
+        return ''
 
-print(result_pre)
-print(result_mid)
-print(result_post)
+    if not dic.get(now):
+        return now
+
+    left = post_order(dic[now][0])
+    right = post_order(dic[now][1])
+
+    return left + right + now
+
+for _ in range(N):
+    now, left, right = input().split()
+    dic[now] = [left, right]
+
+print(pre_order('A'))
+print(in_order('A'))
+print(post_order('A'))
