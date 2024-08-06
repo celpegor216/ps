@@ -1,25 +1,23 @@
 lst = list(map(int, input().split()))
+N = 10
 
 result = 0
-
-def dfs(level, path):
+def dfs(level, total, now):
     global result
 
-    if level == 10:
-        total = 0
-        for i in range(10):
-            if path[i] == lst[i]:
-                total += 1
-        if total >= 5:
-            result += 1
+    # 남은 문제를 다 맞춰도 5개 미만이라면 종료
+    if total + N - level < 5:
+        return
+
+    if level == N:
+        result += 1
         return
 
     for i in range(1, 6):
-        if len(path) > 1 and path[-1] == i and path[-2] == i:
-                continue
-        else:
-            dfs(level + 1, path + [i])
+        if level > 1 and now[-1] == now[-2] == i:
+            continue
+        dfs(level + 1, total + 1 if lst[level] == i else total, now + [i])
 
-dfs(0, [])
+dfs(0, 0, [])
 
 print(result)
