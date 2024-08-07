@@ -1,25 +1,25 @@
 N = int(input())
 lst = list(map(int, input().split()))
 
-result = 0
-used = [0] * N
+result = -1    # 절댓값을 다 더하므로 0보다 커질 수 밖에 없음 > 음수로 설정하면 무조건 갱신
+used = [-1] * N    # 순열
 
-def dfs(level, now):
+def dfs(level):
     global result
 
     if level == N:
-        tmp = 0
+        total = 0
         for n in range(N - 1):
-            tmp += abs(now[n] - now[n + 1])
-        result = max(result, tmp)
+            total += abs(used[n] - used[n + 1])
+        result = max(result, total)
         return
-    
-    for n in range(N):
-        if not used[n]:
-            used[n] = 1
-            dfs(level + 1, now + [lst[n]])
-            used[n] = 0
 
-dfs(0, [])
+    for n in range(N):
+        if used[n] == -1:
+            used[n] = lst[level]
+            dfs(level + 1)
+            used[n] = -1
+
+dfs(0)
 
 print(result)
