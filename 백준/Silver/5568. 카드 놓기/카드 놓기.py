@@ -2,14 +2,14 @@ N = int(input())
 K = int(input())
 lst = [input() for _ in range(N)]
 
-used = [0] * N
-
 result = set()
+used = [0] * N    # 순열
+
 def dfs(level, now):
     if level == K:
         result.add(now)
         return
-    
+
     for n in range(N):
         if not used[n]:
             used[n] = 1
