@@ -1,11 +1,10 @@
 N = int(input())
 
-result = 0
-
 col = [0] * N
-cross_left = [0] * N * 2 # N - (i - j)
-cross_right = [0] * N * 2 # i + j
+lurd = [0] * N * 2    # 왼쪽 위 - 오른쪽 아래 대각선, 행 인덱스 - 열 인덱스 + N
+ldru = [0] * N * 2    # 왼쪽 아래 - 오른쪽 위 대각선, 행 인덱스 + 열 인덱스
 
+result = 0
 def dfs(level):
     global result
 
@@ -13,17 +12,15 @@ def dfs(level):
         result += 1
         return
 
-    for n in range(N):
-        cl = N - (level - n)
-        cr = level + n
-        if not col[n] and not cross_left[cl] and not cross_right[cr]:
-            col[n] = 1
-            cross_left[cl] = 1
-            cross_right[cr] = 1
+    for i in range(N):    # 체스판의 level번째 행, i번째 열에 놓을 수 있는지 확인
+        if not col[i] and not lurd[level - i + N] and not ldru[level + i]:
+            col[i] = 1
+            lurd[level - i + N] = 1
+            ldru[level + i] = 1
             dfs(level + 1)
-            col[n] = 0
-            cross_left[cl] = 0
-            cross_right[cr] = 0
+            col[i] = 0
+            lurd[level - i + N] = 0
+            ldru[level + i] = 0
 
 dfs(0)
 
