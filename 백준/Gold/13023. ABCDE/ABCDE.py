@@ -1,35 +1,37 @@
-import sys
-input = sys.stdin.readline
+# union-find로 풀려고 했는데 아니었음
+# bfs도 안 되는군...
 
 N, M = map(int, input().split())
 lst = [[] for _ in range(N)]
 
-for m in range(M):
+for _ in range(M):
     a, b = map(int, input().split())
     lst[a].append(b)
     lst[b].append(a)
 
 result = 0
-
 used = [0] * N
-
-def dfs(now, cnt):
+def dfs(level, now):
     global result
 
     if result:
         return
 
-    if cnt == 5:
+    if level == 5:
         result = 1
         return
-    
-    for item in lst[now]:
-        if not used[item]:
-            used[item] = 1
-            dfs(item, cnt + 1)
-            used[item] = 0
+
+    for nxt in lst[now]:
+        if not used[nxt]:
+            used[nxt] = 1
+            dfs(level + 1, nxt)
+            used[nxt] = 0
+
 
 for n in range(N):
-    dfs(n, 0)
+    dfs(0, n)
+
+    if result:
+        break
 
 print(result)
