@@ -1,44 +1,45 @@
 N = int(input())
-lst = list(map(int, input().split()))
-calcs = list(map(int, input().split())) # + - * //
-table = '+-*/'
+lst = list(map(int, input().split()))    # 숫자 순서는 그대로
+calcs = list(map(int, input().split()))    # +, -, *, /
 
-minv, maxv = 10e11, -10e11
+result_max = -21e8
+result_min = 21e8
 
-def dfs(level, path):
-    global minv, maxv
+def calculate(tmp):
+    res = lst[0]
+
+    for n in range(N - 1):
+        if tmp[n] == 0:
+            res += lst[n + 1]
+        elif tmp[n] == 1:
+            res -= lst[n + 1]
+        elif tmp[n] == 2:
+            res *= lst[n + 1]
+        elif tmp[n] == 3:
+            # 음수를 양수로 나누는 경우
+            if res < 0 and lst[n + 1] > 0:
+                res = -(-res // lst[n + 1])
+            else:
+                res //= lst[n + 1]
+
+    return res
+
+def dfs(level, now):
+    global result_min, result_max
 
     if level == N - 1:
-        total = lst[0]
-
-        for i in range(N - 1):
-            if path[i] == '+':
-                total += lst[i + 1]
-            elif path[i] == '-':
-                total -= lst[i + 1]
-            elif path[i] == '*':
-                total *= lst[i + 1]
-            else:
-                if total > 0:
-                    total //= lst[i + 1]
-                elif total < 0:
-                    total = -(-total // lst[i + 1])
-        
-        if total > maxv:
-            maxv = total
-        
-        if total < minv:
-            minv = total
-        
+        result = calculate(now)
+        result_min = min(result_min, result)
+        result_max = max(result_max, result)
         return
-    
-    for i in range(4):
-        if calcs[i] > 0:
-            calcs[i] -= 1
-            dfs(level + 1, path + table[i])
-            calcs[i] += 1
 
-dfs(0, '')
+    for n in range(4):
+        if calcs[n]:
+            calcs[n] -= 1
+            dfs(level + 1, now + [n])
+            calcs[n] += 1
 
-print(maxv)
-print(minv)
+dfs(0, [])
+
+print(result_max)
+print(result_min)
