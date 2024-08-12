@@ -1,43 +1,39 @@
-# 시간 초과 해결 힌트: https://www.acmicpc.net/board/view/102609
-
-import heapq
-import sys
-
+import sys, heapq
 input = sys.stdin.readline
 
 N, M = map(int, input().split())
-is_visible = list(map(int, input().split()))
-edges = [[] for _ in range(N)]
+findable = list(map(int, input().split()))
+lst = [[] for _ in range(N)]
 
-for m in range(M):
+for _ in range(M):
     a, b, t = map(int, input().split())
-
-    if (a != N - 1 and is_visible[a]) or (b != N - 1 and is_visible[b]):
-        continue
-
-    edges[a].append((b, t))
-    edges[b].append((a, t))
+    lst[a].append((t, b))
+    lst[b].append((t, a))
 
 q = []
+heapq.heappush(q, (0, 0))    # 0번째 분기점에서 시작
 
-result = [10 ** 12] * N
+MAXV = 21e21
+result = [MAXV] * N
 result[0] = 0
 
-heapq.heappush(q, (0, 0))
-
 while q:
-    start_via_cost, via = heapq.heappop(q)
+    cost, via = heapq.heappop(q)
 
-    if result[via] < start_via_cost:
+    if cost > result[via]:
         continue
 
-    for target, cost in edges[via]:
-        start_via_target_cost = start_via_cost + cost
-        if start_via_target_cost < result[target]:
-            result[target] = start_via_target_cost
-            heapq.heappush(q, (start_via_target_cost, target))
+    if via == N - 1:    # 도착지
+        continue
 
-if result[-1] == 10 ** 12:
-    print(-1)
-else:
-    print(result[-1])
+    for nxt_cost, nxt in lst[via]:
+        if nxt != N - 1 and findable[nxt]:
+            continue
+
+        if cost + nxt_cost >= result[nxt]:
+            continue
+
+        heapq.heappush(q, (cost + nxt_cost, nxt))
+        result[nxt] = cost + nxt_cost
+
+print(result[-1] if result[-1] != MAXV else -1)
