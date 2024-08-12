@@ -1,25 +1,37 @@
-N, D = map(int, input().split())
-shortcuts = [list(map(int, input().split())) for _ in range(N)]
-shortcuts.sort()
+import heapq
 
-used = [0] * N
+N, D = map(int, input().split())
+lst = []
+
+for _ in range(N):
+    a, b, c = map(int, input().split())
+
+    if b > D:
+        continue
+    lst.append((a, b, c))
+
+N = len(lst)
+
+lst.sort()
+
+costs = [D] * N
+q = []
+for n in range(N):
+    costs[n] = lst[n][0] + lst[n][2]
+    heapq.heappush(q, (costs[n], n))
+
+while q:
+    cost, via = heapq.heappop(q)
+
+    for nxt in range(via + 1, N):
+        if lst[nxt][0] >= lst[via][1]:
+            nxt_cost = cost + lst[nxt][0] - lst[via][1] + lst[nxt][2]
+            if nxt_cost < costs[nxt]:
+                costs[nxt] = nxt_cost
+                heapq.heappush(q, (nxt_cost, nxt))
 
 result = D
-def dfs(now, total):
-    global result
-
-    if now <= D:
-        result = min(result, total + D - now)
-    
-    if now >= D:
-        return
-    
-    for n in range(N):
-        if not used[n] and shortcuts[n][0] >= now:
-            used[n] = 1
-            dfs(shortcuts[n][1], total + shortcuts[n][2] + (shortcuts[n][0] - now))
-            used[n] = 0
-
-dfs(0, 0)
+for n in range(N):
+    result = min(result, D - lst[n][1] + costs[n])
 
 print(result)
