@@ -1,40 +1,29 @@
 N = int(input())
-query = [list(map(int, input().split())) for _ in range(N)]
+queries = []
+
+for _ in range(N):
+    num, s, b = map(int, input().split())
+    num = str(num)
+    queries.append((num, s, b))
 
 result = 0
-used = [0] * 10
 
-def dfs(level, now):
-    global result
+# 1에서 9까지의 서로 다른 숫자 세 개로 구성된 세 자리 수
+for i in range(123, 988):
+    st = str(i)
+    if '0' in st or st[0] == st[1] or st[1] == st[2] or st[0] == st[2]:
+        continue
 
-    if level == 3:
-        flag = 1
-
-        for num, strike, ball in query:
-            num = str(num)
-
-            cnt_strike = 0
-            cnt_ball = 0
-
-            for i in range(3):
-                if now[i] == num[i]:
-                    cnt_strike += 1
-                elif now[i] in num:
-                    cnt_ball += 1
-
-            if cnt_strike != strike or cnt_ball != ball:
-                flag = 0
-                break
-
-        result += flag
-        return
-
-    for i in range(1, 10):
-        if not used[i]:
-            used[i] = 1
-            dfs(level + 1, now + str(i))
-            used[i] = 0
-
-dfs(0, '')
+    for num, s, b in queries:
+        cnt_s = cnt_b = 0
+        for j in range(3):
+            if st[j] == num[j]:
+                cnt_s += 1
+            elif st[j] in num:
+                cnt_b += 1
+        if cnt_s != s or cnt_b != b:
+            break
+    else:
+        result += 1
 
 print(result)
