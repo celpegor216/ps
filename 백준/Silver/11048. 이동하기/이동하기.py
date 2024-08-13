@@ -1,14 +1,15 @@
 N, M = map(int, input().split())
 lst = [list(map(int, input().split())) for _ in range(N)]
 
-dp = [[0] * M for _ in range(N)]
+for i in range(N):
+    for j in range(M):
+        if i == j == 0:
+            continue
+        elif i == 0:
+            lst[i][j] += lst[i][j - 1]
+        elif j == 0:
+            lst[i][j] += lst[i - 1][j]
+        else:
+            lst[i][j] += max(lst[i - 1][j], lst[i][j - 1], lst[i - 1][j - 1])
 
-for n in range(N):
-    for m in range(M):
-        left = dp[n][m - 1] if m > 0 else 0
-        up = dp[n - 1][m] if n > 0 else 0
-        leftup = dp[n - 1][m - 1] if m > 0  and n > 0 else 0
-
-        dp[n][m] = lst[n][m] + max(left, up, leftup)
-
-print(dp[-1][-1])
+print(lst[-1][-1])
