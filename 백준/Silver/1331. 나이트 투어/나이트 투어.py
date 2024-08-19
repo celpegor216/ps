@@ -1,29 +1,27 @@
-N = 36
-lst = []
-used = set()
-result = 'Valid'
+def pos(now):
+    return ord(now[0]) - ord('A'), N - int(now[1])
 
-for _ in range(N):
-    tmp = input()
-    y, x = list(tmp)
-    lst.append((ord(y) - ord('A') + 1, int(x)))
-    if tmp not in used:
-        used.add(tmp)
+N = 6
+directions = ((1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1), (-1, 2))
+
+used = [[0] * N for _ in range(N)]
+
+sy, sx = pos(input())    # 시작점
+y, x = sy, sx
+used[y][x] = 1
+
+result = 'Valid'
+for n in range(N ** 2 - 1):
+    ny, nx = pos(input())
+
+    if (y - ny, x - nx) in directions and not used[ny][nx]:
+        used[ny][nx] = 1
+        y, x = ny, nx
     else:
         result = 'Invalid'
+        break
 
-lst.append(lst[0])
-
-if result == 'Valid':
-    for n in range(N):
-        y, x = lst[n]
-        flag = 0
-        for dy, dx in ((-2, 1), (-1, 2), (1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1)):
-            ny, nx = y + dy, x + dx
-            if (ny, nx) == lst[n + 1]:
-                flag = 1
-                break
-        if not flag:
-            result = 'Invalid'
-
-print(result)
+if n == N ** 2 - 2 and (y - sy, x - sx) in directions:
+    print(result)
+else:
+    print('Invalid')
