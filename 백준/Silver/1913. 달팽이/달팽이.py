@@ -1,41 +1,41 @@
 N = int(input())
-target = int(input())
+T = int(input())
 
 lst = [[0] * N for _ in range(N)]
-
-y = x = N // 2
-num = 1
-d = -1
 cnt = 1
+y = x = N // 2
+dist = 1
+direction = -1
 
-result = []
+ty = tx = -1
 
 while 1:
-    # 상하
-    for _ in range(cnt):
-        if num == target:
-            result = [y + 1, x + 1]
+    for i in range(dist):
+        if cnt == T:
+            ty = y
+            tx = x
 
-        lst[y][x] = num
-        y += d
-        num += 1
+        lst[y][x] = cnt
+        y += direction
+        cnt += 1
 
-    if num > N ** 2:
+    if y == -1:
         break
 
-    # 우좌
-    for _ in range(cnt):
-        if num == target:
-            result = [y + 1, x + 1]
+    direction *= -1
 
-        lst[y][x] = num
-        x -= d
-        num += 1
+    for i in range(dist):
+        if cnt == T:
+            ty = y
+            tx = x
 
-    d *= -1
-    cnt += 1
+        lst[y][x] = cnt
+        x += direction
+        cnt += 1
+
+    dist += 1
 
 for line in lst:
     print(*line)
 
-print(*result)
+print(ty + 1, tx + 1)
