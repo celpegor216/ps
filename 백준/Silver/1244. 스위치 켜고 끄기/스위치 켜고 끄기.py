@@ -1,25 +1,26 @@
 N = int(input())
-lst = list(map(int, input().split()))
+lst = [0] + list(map(int, input().split()))
 
-for _ in range(int(input())):
-    gender, num = map(int, input().split())
+Q = int(input())
+for _ in range(Q):
+    t, n = map(int, input().split())
 
-    idx = num - 1
-    if gender == 1:
-        while idx < N:
-            lst[idx] = 1 if not lst[idx] else 0
-            idx += num
+    if t == 1:    # n의 배수 스위치 상태를 바꿈
+        i = n
+        while i <= N:
+            lst[i] ^= 1
+            i += n
+    else:    # n을 기준으로 대칭이 깨질 때까지 범위를 넓히면서 스위치 상태를 바꿈
+        lst[n] ^= 1
+        dist = 1
+        while n - dist > 0 and n + dist <= N and lst[n - dist] == lst[n + dist]:
+            lst[n - dist] ^= 1
+            lst[n + dist] ^= 1
+            dist += 1
+
+# 1번 스위치부터 시작해서 한 줄에 20개씩 출력...
+for i in range(1, N + 1, 20):
+    if i + 20 <= N:
+        print(*lst[i: i + 20])
     else:
-        lst[idx] = 1 if not lst[idx] else 0
-        cnt = 1
-        while idx + cnt < N and idx - cnt >= 0:
-            if lst[idx + cnt] != lst[idx - cnt]:
-                break
-            lst[idx + cnt] = 1 if not lst[idx + cnt] else 0
-            lst[idx - cnt] = 1 if not lst[idx - cnt] else 0
-            cnt += 1
-
-for n in range(N):
-    if n > 0 and n % 20 == 0:
-        print()
-    print(lst[n], end=' ')
+        print(*lst[i:])
