@@ -1,56 +1,48 @@
-# 가능한 경우의 수를 모두 구해놓고 그 안에 있는지 찾는 방식으로 하려고 했는데
-# 가능한 경우의 수가 3 ** 15라서 시간초과가 나는 것 같음
-# 브루트포스가 아닌가? 조건문으로 처리하기에는 조건이 너무 복잡해질 것 같은데
-# 힌트: 브루트포스, 백트래킹
-
-lst = [[] for _ in range(4)]
-
-for n in range(4):
-    tmp = list(map(int, input().split()))
-    
-    for m in range(6):
-        lst[n].append(tmp[3 * m:3 * (m + 1)])
-
-vs = []
-for i in range(5):
-    for j in range(i + 1, 6):
-        vs.append([i, j])
-
-def dfs(level, scores):
+def check(a, b):    # a국가와 b국가 간 경기
     global result
 
-    if result:
-        return
-
-    if level == 15:
+    if a == 5:
         result = 1
         return
-    
-    if scores[vs[level][0]][0] > 0 and scores[vs[level][1]][2] > 0:
-        scores[vs[level][0]][0] -= 1
-        scores[vs[level][1]][2] -= 1
-        dfs(level + 1, scores)
-        scores[vs[level][0]][0] += 1
-        scores[vs[level][1]][2] += 1
 
-    if scores[vs[level][0]][2] > 0 and scores[vs[level][1]][0] > 0:
-        scores[vs[level][0]][2] -= 1
-        scores[vs[level][1]][0] -= 1
-        dfs(level + 1, scores)
-        scores[vs[level][0]][2] += 1
-        scores[vs[level][1]][0] += 1
+    na = a
+    nb = b + 1
+    if nb == 6:
+        na += 1
+        nb = na + 1
+    if teams[a][0] and teams[b][-1]:    # a국가가 이기는 경우
+        teams[a][0] -= 1
+        teams[b][-1] -= 1
+        check(na, nb)
+        if result: return
+        teams[a][0] += 1
+        teams[b][-1] += 1
 
-    if scores[vs[level][0]][1] > 0 and scores[vs[level][1]][1] > 0:
-        scores[vs[level][0]][1] -= 1
-        scores[vs[level][1]][1] -= 1
-        dfs(level + 1, scores)
-        scores[vs[level][0]][1] += 1
-        scores[vs[level][1]][1] += 1
+    if teams[a][1] and teams[b][1]:    # 무승부인 경우
+        teams[a][1] -= 1
+        teams[b][1] -= 1
+        check(na, nb)
+        if result: return
+        teams[a][1] += 1
+        teams[b][1] += 1
 
-for n in range(4):
+    if teams[a][-1] and teams[b][0]:    # b국가가 이기는 경우
+        teams[a][-1] -= 1
+        teams[b][0] -= 1
+        check(na, nb)
+        if result: return
+        teams[a][-1] += 1
+        teams[b][0] += 1
+
+
+TC = 4
+
+for _ in range(TC):
+    teams = list(map(int, input().split()))
+
     result = 0
-
-    if sum([sum(item) for item in lst[n]]) == 30:
-        dfs(0, lst[n])
+    if sum(teams) == 30:
+        teams = [teams[i:i + 3] for i in range(0, 18, 3)]
+        check(0, 1)
 
     print(result, end=' ')
