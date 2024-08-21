@@ -1,39 +1,34 @@
+# 지도에 없는 곳, 지도의 범위를 벗어나는 칸은 모두 바다
+# 인접한 세 칸 또는 네 칸에 바다가 있는 땅은 모두 잠겨버린다
+# 지도의 크기는 모든 섬을 포함하는 가장 작은 직사각형
+
 N, M = map(int, input().split())
 lst = [input() for _ in range(N)]
 
-lands = []
+# 50년 뒤 지도의 크기
+miny = minx = N * M
+maxy = maxx = -1
+
+# 50년 뒤 지도에 표시될 좌표
+result = [['.'] * M for _ in range(N)]
 
 for n in range(N):
     for m in range(M):
-        if lst[n][m] == 'X':
-            lands.append((n, m))
+        if lst[n][m] == '.':
+            continue
 
-length = len(lands)
-used = [0] * length
+        cnt = 4    # 인접한 바다의 수
+        for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
+            ny, nx = n + dy, m + dx
+            if 0 <= ny < N and 0 <= nx < M and lst[ny][nx] == 'X':
+                cnt -= 1
 
-for i in range(length):
-    check = 0
+        if cnt < 3:
+            result[n][m] = 'X'
+            miny = min(miny, n)
+            minx = min(minx, m)
+            maxy = max(maxy, n)
+            maxx = max(maxx, m)
 
-    for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
-        ny, nx = lands[i][0] + dy, lands[i][1] + dx
-        if 0 <= ny < N and 0 <= nx < M and (ny, nx) in lands:
-            check += 1
-    
-    if check > 1:
-        used[i] = 1
-
-lands = [lands[x] for x in range(length) if used[x]]
-
-lands.sort()
-y1, y2 = lands[0][0], lands[-1][0]
-
-lands.sort(key=lambda x: x[1])
-x1, x2 = lands[0][1], lands[-1][1]
-
-result = [['.'] * (x2 - x1 + 1) for _ in range(y2 - y1 + 1)]
-
-for land in lands:
-    result[land[0] - y1][land[1] - x1] = 'X'
-
-for line in result:
-    print(''.join(line))
+for line in result[miny:maxy + 1]:
+    print(''.join(line[minx:maxx + 1]))
