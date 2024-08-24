@@ -1,12 +1,9 @@
-s = input()
+S = input()
 
-while s:
-    if s[0] == s[-1]:
-        s = s[1:-1]
+while S:
+    if S[0] == S[-1]:
+        S = S[1:-1]
     else:
         break
 
-if s:
-    print(0)
-else:
-    print(1)
+print(0 if S else 1)
