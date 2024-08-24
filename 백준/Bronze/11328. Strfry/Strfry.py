@@ -1,20 +1,21 @@
-T = int(input())
+N = int(input())
+M = 26
 
-for _ in range(T):
-    a, b = input().split()
+for _ in range(N):
+    A, B = input().split()
 
-    bucket_a = [0] * 26
-    bucket_b = [0] * 26
+    bucket_A = [0] * M
+    bucket_B = [0] * M
 
-    for s in a:
-        bucket_a[ord(s) - ord('a')] += 1
-    for s in b:
-        bucket_b[ord(s) - ord('a')] += 1
+    for a in A:
+        bucket_A[ord(a) - ord('a')] += 1
     
-    result = 1
-    for i in range(26):
-        if bucket_a[i] != bucket_b[i]:
-            result = 0
+    for b in B:
+        bucket_B[ord(b) - ord('a')] += 1
+    
+    for m in range(M):
+        if bucket_A[m] != bucket_B[m]:
+            print('Impossible')
             break
-    
-    print('Possible' if result else 'Impossible')
+    else:
+        print('Possible')
