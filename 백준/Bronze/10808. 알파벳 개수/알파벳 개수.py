@@ -1,6 +1,7 @@
 S = input()
 
-bucket = [0] * 26
+N = 26
+bucket = [0] * N
 
 for s in S:
     bucket[ord(s) - ord('a')] += 1
