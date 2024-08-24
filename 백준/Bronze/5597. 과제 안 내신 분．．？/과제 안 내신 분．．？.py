@@ -1,7 +1,7 @@
-check = [0] * 31
-for n in range(28):
-    check[int(input())] = 1
+N = 28
+lst = set([int(input()) for _ in range(28)])
 
-for n in range(1, 31):
-    if not check[n]:
-        print(n)
+result = sorted(set(range(1, 31)) - lst)
+
+print(result[0])
+print(result[1])
