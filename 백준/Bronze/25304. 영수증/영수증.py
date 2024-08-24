@@ -1,12 +1,7 @@
 X = int(input())
 N = int(input())
+for _ in range(N):
+    A, B = map(int, input().split())
+    X -= A * B
 
-total = 0
-for n in range(N):
-    cost, num = map(int, input().split())
-    total += cost * num
-
-if total == X:
-    print('Yes')
-else:
-    print('No')
+print('Yes' if not X else 'No')
