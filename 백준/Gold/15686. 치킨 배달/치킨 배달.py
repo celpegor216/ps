@@ -1,53 +1,54 @@
+# 도시의 치킨 거리가 가장 작게 될지 구하는 프로그램
+# m이 최대 13이므로 dfs를 돌려서 조합을 만든 다음 계산하면 될 것 같다
+
 N, M = map(int, input().split())
+# 크기가 N×N인 도시
+# 0은 빈 칸, 1은 집, 2는 치킨집
 lst = [list(map(int, input().split())) for _ in range(N)]
 
-houses = []
-chickens = []
 
+chickens = []
+people = []
 for i in range(N):
     for j in range(N):
-        if lst[i][j] == 1:
-            houses.append((i, j))
-        elif lst[i][j] == 2:
+        if lst[i][j] == 2:
             chickens.append((i, j))
-            
-#     \ 치킨집
-#  집
+        elif lst[i][j] == 1:
+            people.append((i, j))
 
-houses_length = len(houses)
-chickens_length = len(chickens)
-delete_length = chickens_length - M
+P = len(people)
+C = len(chickens)
+# distances[i][j]: 사람 i부터 치킨집 j까지의 거리
+distances = [[0] * C for _ in range(P)]
 
-distances = [[] for _ in range(houses_length)]
+for p in range(P):
+    for c in range(C):
+        distances[p][c] = abs(people[p][0] - chickens[c][0]) + abs(people[p][1] - chickens[c][1])
 
-for i in range(houses_length):
-    for chicken in chickens:
-        distances[i].append(abs(houses[i][0] - chicken[0]) + abs(houses[i][1] - chicken[1]))
+# 최대 값은 전체 배열 크기 * 사람 수
+result = N ** 2 * 2 * N
+used = [0] * C
+def dfs(level, start, selected_chickens):
+    global result
 
-min_v = 10e8
-used = [0] * chickens_length
-
-def dfs(level, now):
-    global min_v
-    
-    if level == delete_length:
+    if level == M:
         total = 0
-        for distance in distances:
-            temp = 10e8
-            for i in range(chickens_length):
-                if not used[i] and distance[i] < temp:
-                    temp = distance[i]
-            total += temp
-        if total < min_v:
-            min_v = total
+
+        for p in range(P):
+            minv = N ** 2
+            for c in selected_chickens:
+                minv = min(minv, distances[p][c])
+            total += minv
+
+        result = min(result, total)
         return
 
-    for i in range(now, chickens_length):
-        if not used[i]:
-            used[i] = 1
-            dfs(level + 1, i)
-            used[i] = 0
+    for c in range(start, C):
+        if not used[c]:
+            used[c] = 1
+            dfs(level + 1, c + 1, selected_chickens + [c])
+            used[c] = 0
 
-dfs(0, 0)
+dfs(0, 0, [])
 
-print(min_v)
+print(result)
