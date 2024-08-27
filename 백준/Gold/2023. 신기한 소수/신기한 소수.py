@@ -1,28 +1,19 @@
 N = int(input())
-primes = [2, 3, 5, 7]
-
-def check(num):
-    if num in primes:
-        return
-
-    if num == 1:
-        return 1
-
-    half = int(num ** 0.5)
-
-    for i in range(2, half + 1):
-        if not num % i:
-            return 1
 
 def dfs(level, now):
-    if check(now) or (level and now < 10 ** (level - 1)):
+    if now == 1:
         return
+
+    half = int(now ** 0.5) + 1
+    for i in range(2, half):
+        if not now % i:
+            return
 
     if level == N:
         print(now)
         return
 
-    for i in range(10):
+    for i in range(1, 10):
         dfs(level + 1, now * 10 + i)
 
 dfs(0, 0)
