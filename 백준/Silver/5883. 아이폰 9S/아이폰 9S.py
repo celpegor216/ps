@@ -1,22 +1,23 @@
 N = int(input())
 lst = [int(input()) for _ in range(N)]
-sett = set(lst)
+# 중복 제거해서 원하는 용량의 종류를 계산
+unique = set(lst)
 
 result = 1
-for item in sett:
-    temp = [x for x in lst if x != item]
 
-    cnt = 1
-    now = temp[0]
+# 용량의 종류 중 하나씩 스킵해보면서 가장 긴 연속 구간의 길이를 구하기
+for skip in unique:
+    now = -1    # 현재 연속 구간의 길이를 구하고 있는 수
+    cnt = 0    # 현재 연속 구간의 길이
+    for n in range(N):
+        if lst[n] == skip:
+            continue
 
-    for i in range(1, len(temp)):
-        if temp[i] == now:
-            cnt += 1
-        else:
-            result = max(result, cnt)
+        if lst[n] != now:
             cnt = 1
-            now = temp[i]
-    
-    result = max(result, cnt)
-    
+            now = lst[n]
+        else:
+            cnt += 1
+            result = max(result, cnt)
+
 print(result)
