@@ -1,74 +1,55 @@
-# 각 정보의 첫 번째 정수는 그 구역과 인접한 구역의 수이고, 이후 인접한 구역의 번호가 주어진다.
-
 from collections import deque
 
+# 구역을 두 개의 선거구로 나눠야 하고, 각 구역은 두 선거구 중 하나에 포함
+
 N = int(input())
-nums = [0] + list(map(int, input().split()))
-lst = [[]]
+cnts = list(map(int, input().split()))    # 구역 별 인구 수
+lst = [sorted([x - 1 for x in list(map(int, input().split()))[1:]]) for _ in range(N)]
 
-for n in range(N):
-    tmp = list(map(int, input().split()))
-    lst.append(tmp[1:])
+total_cnt = result = sum(cnts)
 
-result = 21e8
+# 선거구는 구역을 적어도 하나 포함해야 하고, 한 선거구에 포함되어 있는 구역은 모두 연결
+# 임의의 구역(1)을 기준으로 연결할 수 있는 모든 조합 찾기
+q = deque()
+q.append(([0], cnts[0]))
 
-# 두 팀으로 나눔
-for i in range(1, 2 ** N - 1):
-    tmp = bin(i)[2:]
-    tmp = '0' * (N - len(tmp)) + tmp
+used_combinations = set()
+used_combinations.add((0, ))
 
-    team0 = [x + 1 for x in range(N) if tmp[x] == '0']
-    team1 = [x + 1 for x in range(N) if tmp[x] == '1']
+while q:
+    selected, total = q.popleft()
 
-    # 나눠진 팀들이 연결되어 있는지 확인
-    q = deque()
-    q.append(team0[0])
-    used = [0] * (N + 1)
-    used[team0[0]] = 1
-
-    while q:
-        now = q.popleft()
-
-        for item in lst[now]:
-            if item in team0 and not used[item]:
-                used[item] = 1
-                q.append(item)
-
-    flag = 0
-    for i in range(1, N + 1):
-        if i in team0 and not used[i]:
-            flag = 1
-            break
-
-    if flag:
-        continue
-    
-    q = deque()
-    q.append(team1[0])
-    used = [0] * (N + 1)
-    used[team1[0]] = 1
-
-    while q:
-        now = q.popleft()
-
-        for item in lst[now]:
-            if item in team1 and not used[item]:
-                used[item] = 1
-                q.append(item)
-    
-    flag = 0
-    for i in range(1, N + 1):
-        if i in team1 and not used[i]:
-            flag = 1
-            break
-
-    if flag:
+    if len(selected) == N:
         continue
 
-    # 연결되어 있다면 인구 차이 최솟값 구하기
-    result = min(result, abs(sum([nums[x] for x in team0]) - sum([nums[x] for x in team1])))
+    # 남은 선거구들이 하나로 연결되는지 확인
+    not_selected = [n for n in range(N) if n not in selected]
+    used_not_selected_cnt = 1
+    nq = deque()
+    nq.append(not_selected.pop(0))
 
-if result == 21e8:
-    print(-1)
-else:
-    print(result)
+    while nq:
+        now = nq.popleft()
+
+        for nxt in lst[now]:
+            if nxt in not_selected and nxt not in selected:
+                used_not_selected_cnt += 1
+                nq.append(nxt)
+                not_selected.remove(nxt)
+
+    if used_not_selected_cnt == N - len(selected):
+        result = min(result, abs((total_cnt - total) - total))
+
+    for now in selected:
+        for nxt in lst[now]:
+            if nxt in selected:
+                continue
+
+            nxt_selected = selected + [nxt]
+            nxt_tup = tuple(sorted(nxt_selected))
+
+            if nxt_tup not in used_combinations:
+                used_combinations.add(nxt_tup)
+                q.append((nxt_selected, total + cnts[nxt]))
+
+print(result if result != total_cnt else -1)
