@@ -1,88 +1,61 @@
+# 사각 지대의 최소 크기를 구하는 프로그램
+# CCTV는 벽을 통과할 수 없다, CCTV는 CCTV를 통과할 수 있다
+# 6은 벽
+# CCTV의 최대 개수는 8개를 넘지 않는다
+
 N, M = map(int, input().split())
 lst = [list(map(int, input().split())) for _ in range(N)]
-cctvs = []
 
-cnt = 0
-for n in range(N):
-    for m in range(M):
-        if 0 < lst[n][m] < 6:
-            cctvs.append([n, m, lst[n][m], -1])
-        elif lst[n][m] == 0:
-            cnt += 1
+cctv = []
+wall = 0
+for i in range(N):
+    for j in range(M):
+        if 0 < lst[i][j] < 6:
+            cctv.append((i, j))
+        elif lst[i][j] == 6:
+            wall += 1
+length = len(cctv)
 
-length = len(cctvs)
+dirs = ((0, 1), (1, 0), (0, -1), (-1, 0))
+directions = [
+    [],
+    [[0], [1], [2], [3]],
+    [[0, 2], [1, 3]],
+    [[0, 1], [1, 2], [2, 3], [3, 0]],
+    [[0, 1, 2], [1, 2, 3], [2, 3, 0], [3, 0, 1]],
+    [[0, 1, 2, 3]]
+]
 
-result = cnt
+used = [[0] * M for _ in range(N)]
+result = 0    # 갈 수 있는 넓이의 최댓값
+def dfs(level, total):
+    global result
 
-ds = ((0, 1), (1, 0), (0, -1), (-1, 0))
-
-def dfs(level):
-    global result, cnt
     if level == length:
-        # 사각 지대 개수 세기
-        total = cnt
-
-        used = [[0] * M for _ in range(N)]
-
-        for i in range(length):
-            y, x, num, d = cctvs[i]
-            if num == 1:
-                ny, nx = y + ds[d][0], x + ds[d][1]
-                while 0 <= ny < N and 0 <= nx < M and lst[ny][nx] != 6:
-                    used[ny][nx] = 1
-                    ny += ds[d][0]
-                    nx += ds[d][1]
-            elif num == 2:
-                for j in range(2):
-                    td = d + j * 2
-                    ny, nx = y + ds[td][0], x + ds[td][1]
-                    while 0 <= ny < N and 0 <= nx < M and lst[ny][nx] != 6:
-                        used[ny][nx] = 1
-                        ny += ds[td][0]
-                        nx += ds[td][1]
-            elif num == 3:
-                for j in range(2):
-                    td = (d + j) % 4
-                    ny, nx = y + ds[td][0], x + ds[td][1]
-                    while 0 <= ny < N and 0 <= nx < M and lst[ny][nx] != 6:
-                        used[ny][nx] = 1
-                        ny += ds[td][0]
-                        nx += ds[td][1]
-            elif num == 4:
-                for j in range(3):
-                    td = (d + j) % 4
-                    ny, nx = y + ds[td][0], x + ds[td][1]
-                    while 0 <= ny < N and 0 <= nx < M and lst[ny][nx] != 6:
-                        used[ny][nx] = 1
-                        ny += ds[td][0]
-                        nx += ds[td][1]
-            else:
-                for td in range(4):
-                    ny, nx = y + ds[td][0], x + ds[td][1]
-                    while 0 <= ny < N and 0 <= nx < M and lst[ny][nx] != 6:
-                        used[ny][nx] = 1
-                        ny += ds[td][0]
-                        nx += ds[td][1]
-
-        for n in range(N):
-            for m in range(M):
-                if used[n][m] == 1 and lst[n][m] == 0:
-                    total -= 1
-
-        result = min(result, total)
+        result = max(result, total)
         return
 
-    if cctvs[level][2] == 2:
-        for i in range(2):
-            cctvs[level][3] = i
-            dfs(level + 1)
-    elif cctvs[level][2] != 5:
-        for i in range(4):
-            cctvs[level][3] = i
-            dfs(level + 1)
-    else:
-        dfs(level + 1)
+    # 갈 수 있는 방향 쌍
+    i, j = cctv[level]
+    for ds in directions[lst[i][j]]:
+        # 갈 수 있다고 칠 한 칸들(다시 돌려주기 위함)
+        checked = []
 
-dfs(0)
+        for d in ds:
+            dy, dx = dirs[d]
+            ny, nx = i, j
+            while 0 <= ny < N and 0 <= nx < M and lst[ny][nx] != 6:
+                if not used[ny][nx]:
+                    checked.append((ny, nx))
+                    used[ny][nx] = 1
+                ny += dy
+                nx += dx
 
-print(result)
+        dfs(level + 1, total + len(checked))
+
+        for ny, nx in checked:
+            used[ny][nx] = 0
+
+dfs(0, 0)
+
+print(N * M - result - wall)
