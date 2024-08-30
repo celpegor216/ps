@@ -1,63 +1,93 @@
+# N×N 크기
 N = int(input())
-lst = [[0] * N for _ in range(N)]
-students = dict()
-dy = [0, 1, 0, -1]
-dx = [1, 0, -1, 0]
+M = N
+# 각 학생이 좋아하는 학생 4명
+# 학생의 번호는 중복되지 않으며, 어떤 학생이 좋아하는 학생 4명은 모두 다른 학생
+# 어떤 학생이 자기 자신을 좋아하는 경우는 없다.
+lst = []
 
-for n in range(N ** 2):
-    tmp = list(map(int, input().split()))
-    now = tmp[0]
-    favs = tmp[1:]
-    students[now] = favs
+# order[i]: i번 학생의 입력 순서(나중에 점수 계산할 때 좋아하는 친구 찾기 위함)
+order = [-1] * (N * N + 1)
 
-    if n == 0:
-        lst[1][1] = tmp[0]
-    else:
-        cnt_fav = cnt_blank = 0
-        idx = [21e8, 21e8]
+for n in range(N * N):
+    # 학생의 번호와 그 학생이 좋아하는 학생 4명의 번호
+    lst.append(list(map(int, input().split())))
+    order[lst[-1][0]] = n
 
-        for i in range(N):
-            for j in range(N):
-                if not lst[i][j]:
-                    tmp_cnt_fav = tmp_cnt_blank = 0
+directions = ((0, 1), (1, 0), (0, -1), (-1, 0))
 
-                    for d in range(4):
-                        ni, nj = i + dy[d], j + dx[d]
-                        if 0 <= ni < N and 0 <= nj < N:
-                            if lst[ni][nj] in favs:
-                                tmp_cnt_fav += 1
-                            elif not lst[ni][nj]:
-                                tmp_cnt_blank += 1
-                    
-                    if tmp_cnt_fav > cnt_fav:
-                        cnt_fav = tmp_cnt_fav
-                        cnt_blank = tmp_cnt_blank
-                        idx = [i, j]
-                    elif tmp_cnt_fav == cnt_fav:
-                        if tmp_cnt_blank > cnt_blank:
-                            cnt_blank = tmp_cnt_blank
-                            idx = [i, j]
-                        elif tmp_cnt_blank == cnt_blank:
-                            if idx[0] > i:
-                                idx = [i, j]
-                            elif idx[0] == i:
-                                if idx[1] > j:
-                                    idx[1] = j
-        
-        lst[idx[0]][idx[1]] = now
+# 처음에는 교실의 모든 칸은 빈 칸
+board = [[0] * M for _ in range(N)]
 
+
+# 학생의 순서대로 배치
+for student, *likes in lst:
+    # 비어있는 칸 중에서 좋아하는 학생이 인접한 칸에 가장 많은 칸으로 자리를 정한다.
+    # 1을 만족하는 칸이 여러 개이면, 인접한 칸 중에서 비어있는 칸이 가장 많은 칸으로 자리를 정한다.
+    # 2를 만족하는 칸도 여러 개인 경우에는 행의 번호가 가장 작은 칸으로, 그러한 칸도 여러 개이면 열의 번호가 가장 작은 칸으로 자리를 정한다.
+
+    res_cnt_likes = -1
+    res_cnt_blanks = -1
+    res_pos = []
+
+    for i in range(N):
+        for j in range(M):
+            # 비어있는 칸 중에서
+            if board[i][j]:
+                continue
+
+            cnt_likes = 0
+            cnt_blanks = 0
+
+            for dy, dx in directions:
+                ny, nx = i + dy, j + dx
+                if 0 <= ny < N and 0 <= nx < M:
+                    if board[ny][nx] in likes:
+                        cnt_likes += 1
+                    elif not board[ny][nx]:
+                        cnt_blanks += 1
+
+            # > 정렬 기준: 좋아하는 친구 수가 큰 순 >
+            #            비어있는 칸의 수가 큰 순 >
+            #            행 번호가 작은 순 >
+            #            열 번호가 작은 순
+            if res_cnt_likes < cnt_likes:
+                res_cnt_likes = cnt_likes
+                res_cnt_blanks = cnt_blanks
+                res_pos = [i, j]
+            elif res_cnt_likes == cnt_likes:
+                if res_cnt_blanks < cnt_blanks:
+                    res_cnt_likes = cnt_likes
+                    res_cnt_blanks = cnt_blanks
+                    res_pos = [i, j]
+                elif res_cnt_blanks == cnt_blanks:
+                    if res_pos[0] > i:
+                        res_cnt_likes = cnt_likes
+                        res_cnt_blanks = cnt_blanks
+                        res_pos = [i, j]
+                    elif res_pos[0] == i:
+                        if res_pos[1] > j:
+                            res_cnt_likes = cnt_likes
+                            res_cnt_blanks = cnt_blanks
+                            res_pos = [i, j]
+
+    board[res_pos[0]][res_pos[1]] = student
+
+
+# 학생의 만족도는 자리 배치가 모두 끝난 후에 구할 수 있다
+# 학생의 만족도를 구하려면 그 학생과 인접한 칸에 앉은 좋아하는 학생의 수를 구해야 한다.
 result = 0
-
 for i in range(N):
-    for j in range(N):
-        cnt = 0
+    for j in range(M):
+        now = board[i][j]
+        cnt_likes = 0
 
-        for d in range(4):
-            ni, nj = i + dy[d], j + dx[d]
-            if 0 <= ni < N and 0 <= nj < N and lst[ni][nj] in students[lst[i][j]]:
-                cnt += 1
-        
-        if cnt:
-            result += 10 ** (cnt - 1)
+        for dy, dx in directions:
+            ny, nx = i + dy, j + dx
+            if 0 <= ny < N and 0 <= nx < M and board[ny][nx] in lst[order[now]]:
+                cnt_likes += 1
+
+        if cnt_likes:
+            result += 10 ** (cnt_likes - 1)
 
 print(result)
