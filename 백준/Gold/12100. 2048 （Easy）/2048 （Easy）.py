@@ -1,169 +1,55 @@
-from copy import deepcopy
-
+# 격자의 크기 n, 최대 20, n * n
 N = int(input())
-lst = [list(map(int, input().split())) for _ in range(N)]
+M = N
+# 블록은 적어도 하나 이상 주어진다
+# 격자의 빈칸은 0으로 나타내며, 블록들은 2의 거듭제곱 형태
 
+
+def rotate(cnt, lst):
+    for _ in range(cnt):
+        lst = list(map(list, zip(*lst[::-1])))
+    return lst
+
+
+# dfs로 5번 이동
+L = 5
 result = 0
-
-def move(level, now):
+def dfs(level, lst):
     global result
 
-    for i in range(N):
-        for j in range(N):
-            result = max(result, now[i][j])
-
-    if level == 5:
+    # 5번 움직인 이후에 격자판에서 가장 큰 값의 최댓값을 구하는 프로그램
+    if level == L:
+        for line in lst:
+            result = max(result, max(line))
         return
-    
-    up = deepcopy(now)
-    used = [[0] * N for _ in range(N)]
-    for j in range(N):
-        for i in range(1, N):
-            idx = i - 1
-            while idx >= 0:
-                if not up[idx][j]:
-                    if idx != 0:
-                        idx -= 1
-                    else:
-                        up[idx][j] = up[i][j]
-                        up[i][j] = 0
-                        break
-                else:
-                    if up[idx][j] == up[i][j] and not used[idx][j]:
-                        used[idx][j] = 1
-                        up[idx][j] *= 2
-                        up[i][j] = 0
-                    else:
-                        if idx + 1 != i:
-                            up[idx + 1][j] = up[i][j]
-                            up[i][j] = 0
-                    break
-    
-    flag = 0
-    for i in range(N):
-        if flag:
-            break
 
-        for j in range(N):
-            if now[i][j] != up[i][j]:
-                flag = 1
-                break
-    
-    if flag:
-        move(level + 1, up)
-  
-    down = deepcopy(now)
-    used = [[0] * N for _ in range(N)]
-    for j in range(N):
-        for i in range(N - 2, -1, -1):
-            idx = i + 1
-            while idx < N:
-                if not down[idx][j]:
-                    if idx != N - 1:
-                        idx += 1
-                    else:
-                        down[idx][j] = down[i][j]
-                        down[i][j] = 0
-                        break
-                else:
-                    if down[idx][j] == down[i][j] and not used[idx][j]:
-                        used[idx][j] = 1
-                        down[idx][j] *= 2
-                        down[i][j] = 0
-                    else:
-                        if idx - 1 != i:
-                            down[idx - 1][j] = down[i][j]
-                            down[i][j] = 0
-                    break
-    
-    flag = 0
-    for i in range(N):
-        if flag:
-            break
+    for i in range(4):
+        # 90도 * i번 회전
+        nxt = rotate(i, [line[:] for line in lst])
 
-        for j in range(N):
-            if now[i][j] != down[i][j]:
-                flag = 1
-                break
-    
-    if flag:
-        move(level + 1, down)
-  
-    left = deepcopy(now)
-    used = [[0] * N for _ in range(N)]
-    for i in range(N):
-        for j in range(1, N):
-            idx = j - 1
-            while idx >= 0:
-                if not left[i][idx]:
-                    if idx != 0:
-                        idx -= 1
-                    else:
-                        left[i][idx] = left[i][j]
-                        left[i][j] = 0
-                        break
-                else:
-                    if left[i][idx] == left[i][j] and not used[i][idx]:
-                        used[i][idx] = 1
-                        left[i][idx] *= 2
-                        left[i][j] = 0
-                    else:
-                        if idx + 1 != j:
-                            left[i][idx + 1] = left[i][j]
-                            left[i][j] = 0
-                    break
-    
-    flag = 0
-    for i in range(N):
-        if flag:
-            break
+        # 세 개 이상의 같은 숫자가 중력작용 방향으로 놓여 있으면,
+        # 중력에 의해 부딪히게 될 벽(바닥)에서 가까운 숫자부터 두 개씩만 합쳐집니다
+        # 단 한 번의 중력작용으로 이미 합쳐진 숫자가 연쇄적으로 합쳐지진 않습니다
 
-        for j in range(N):
-            if now[i][j] != left[i][j]:
-                flag = 1
-                break
-    
-    if flag:
-        move(level + 1, left)
-  
-    right = deepcopy(now)
-    used = [[0] * N for _ in range(N)]
-    for i in range(N):
-        for j in range(N - 2, -1, -1):
-            idx = j + 1
-            while idx < N:
-                if not right[i][idx]:
-                    if idx != N - 1:
-                        idx += 1
-                    else:
-                        right[i][idx] = right[i][j]
-                        right[i][j] = 0
-                        break
-                else:
-                    if right[i][idx] == right[i][j] and not used[i][idx]:
-                        used[i][idx] = 1
-                        right[i][idx] *= 2
-                        right[i][j] = 0
-                    else:
-                        if idx - 1 != j:
-                            right[i][idx - 1] = right[i][j]
-                            right[i][j] = 0
-                    break
-    
-    flag = 0
-    for i in range(N):
-        if flag:
-            break
+        for m in range(M):
+            last_merged = N + 1
+            for n in range(N - 2, -1, -1):
+                if nxt[n][m]:
+                    y = n
+                    while y < N - 1:
+                        if nxt[y + 1][m]:
+                            if y + 1 != last_merged and nxt[y + 1][m] == nxt[y][m]:
+                                nxt[y][m] = 0
+                                nxt[y + 1][m] *= 2
+                                last_merged = y + 1
+                            break
+                        else:
+                            nxt[y][m], nxt[y + 1][m] = nxt[y + 1][m], nxt[y][m]
+                            y += 1
 
-        for j in range(N):
-            if now[i][j] != right[i][j]:
-                flag = 1
-                break
-    
-    if flag:
-        move(level + 1, right)
+        dfs(level + 1, rotate(4 - i, nxt))
 
 
-move(0, lst)
+dfs(0, [list(map(int, input().split())) for _ in range(N)])
 
 print(result)
