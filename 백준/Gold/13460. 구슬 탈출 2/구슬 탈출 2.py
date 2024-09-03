@@ -1,86 +1,77 @@
-# 해답: https://bgspro.tistory.com/70
+# 아무리 봐도 로직의 어느 부분이 틀렸는지 모르겠다... 망했다...
+# 코드트리 틀린 부분 테스트 케이스 참고함
+
 
 from collections import deque
 
 N, M = map(int, input().split())
 lst = [list(input()) for _ in range(N)]
 
-ry = rx = by = bx = 0
+ry = rx = by = bx = -1
 
-for i in range(N):
-    for j in range(M):
+# 상자의 바깥 부분은 전부 장애물로 막혀있게 주어진다
+for i in range(1, N - 1):
+    for j in range(1, M - 1):
         if lst[i][j] == 'R':
             ry, rx = i, j
+            lst[i][j] = '.'
         elif lst[i][j] == 'B':
             by, bx = i, j
+            lst[i][j] = '.'
 
-def bfs(ry, rx, by, bx):
-    q = deque()
-    q.append((ry, rx, by, bx, 0))
-    
-    used = []
-    used.append((ry, rx, by, bx, 0))
-    
-    while q:
-        ry, rx, by, bx, cnt = q.popleft()
-        
-        if cnt == 11:
-            print(-1)
-            return
-        
-        if lst[ry][rx] == 'O':
-            print(cnt)
-            return
+q = deque()
+q.append((ry, rx, by, bx, 0))
 
-        for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
-            # 빨강 구슬 움직임
-            nry, nrx = ry, rx
-            
-            while 1:
-                nry += dy
-                nrx += dx
-                
-                if lst[nry][nrx] == '#':
-                    nry -= dy
-                    nrx -= dx
-                    break
-                    
-                if lst[nry][nrx] == 'O':
-                    break
-            
-            # 파랑 구슬 움직임
-            nby, nbx = by, bx
-            
-            while 1:
-                nby += dy
-                nbx += dx
-                
-                if lst[nby][nbx] == '#':
+used = dict()
+used[(ry, rx, by, bx)] = 1
+
+
+def move(y, x):
+    ny, nx = y + dy, x + dx
+    while 0 <= ny < N and 0 <= nx < M and lst[ny][nx] == '.':
+        ny += dy
+        nx += dx
+
+    if not (0 <= ny < N and 0 <= nx < M) or lst[ny][nx] == '#':
+        ny -= dy
+        nx -= dx
+
+    return ny, nx
+
+
+# 빨간색 사탕을 밖으로 빼내기 위해 기울여야 하는 최소 횟수
+result = -1
+while q:
+    now_ry, now_rx, now_by, now_bx, cnt = q.popleft()
+
+    # 10번 이내에 빨간색 사탕을 밖으로 빼내는 것이 불가능하다면, −1을 출력
+    if cnt > 10:
+        break
+
+    if lst[now_ry][now_rx] == 'O':
+        result = cnt
+        break
+
+    # 사탕을 밖으로 빼기 위해서는 상자를 위, 아래, 왼쪽, 오른쪽 방향으로 기울일 수 있는데,
+    # 기울어진 방향으로 사탕은 장애물 혹은 다른 사탕에 부딪히기 전 까지 미끄러지게 되며,
+    # 미끄러지는 도중에 상자를 다른 방향으로 기울일 수는 없습니다
+
+    for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
+        nry, nrx = move(now_ry, now_rx)
+        nby, nbx = move(now_by, now_bx)
+
+        if lst[nby][nbx] != 'O':
+            if nby == nry and nbx == nrx:
+                # 빨간 구슬 먼저 이동
+                if now_ry * dy > now_by * dy or now_rx * dx > now_bx * dx:
                     nby -= dy
                     nbx -= dx
-                    break
-                    
-                if lst[nby][nbx] == 'O':
-                    break
-            
-            # 파랑 구슬이 구멍에 들어간 경우 종료
-            if lst[nby][nbx] == 'O':
-                continue
-            
-            # 두 구슬이 이동한 위치가 같다면, 더 많이 이동한 구슬이 더 늦게 온 구슬이므로 한 칸 덜 이동
-            if nry == nby and nrx == nbx:
-                if abs(nry - ry) + abs(nrx - rx) > abs(nby - by) + abs(nbx - bx):
-                    nry -= dy
-                    nrx -= dx
+                # 파란 구슬 먼저 이동
                 else:
-                    nby -= dy
-                    nbx -= dx
-            
-            # 방문한 적 없는 위치라면 추가
-            if (nry, nrx, nby, nbx, cnt + 1) not in used:
+                    nry -= dy
+                    nrx -= dx
+            if not used.get((nry, nrx, nby, nbx)):
+                used[(nry, nrx, nby, nbx)] = 1
                 q.append((nry, nrx, nby, nbx, cnt + 1))
-                used.append((nry, nrx, nby, nbx, cnt + 1))
 
-    print(-1)
-    
-bfs(ry, rx, by, bx)
+print(result)
