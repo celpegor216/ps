@@ -1,33 +1,41 @@
-# 해답: https://aia1235.tistory.com/47
+# 힌트: dfs
 
 import sys
-sys.setrecursionlimit(10 ** 6)
+sys.setrecursionlimit(10 ** 5)
+input = sys.stdin.readline
 
 T = int(input())
 
 def dfs(now):
-    global result
+    if used[now] == 1:
+        return now
+    elif result[now]:
+        return -1
 
     used[now] = 1
-    path.append(now)
+    cycle_num = dfs(lst[now])
+    used[now] = 0
 
-    if not used[lst[now]]:
-        dfs(lst[now])
+    if cycle_num == -1:
+        result[now] = -1
+        return -1
+    elif cycle_num == now:
+        result[now] = 1
+        return -1
     else:
-        if lst[now] in path:
-            result -= (len(path) - path.index(lst[now])) 
-        return
+        result[now] = 1
+        return cycle_num
 
-for t in range(T):
+
+for _ in range(T):
     N = int(input())
-    lst = [0] + list(map(int, input().split()))
-    used = [0] * (N + 1)
+    lst = list(map(lambda x: int(x) - 1, input().split()))
+    used = [0] * N
+    result = [0] * N
 
-    result = N
+    for n in range(N):
+        if result[n]:
+            continue
+        dfs(n)
 
-    for n in range(1, N + 1):
-        if not used[n]:
-            path = []
-            dfs(n)
-    
-    print(result)
+    print(result.count(-1))
