@@ -1,47 +1,51 @@
 from collections import deque
 
 N, M = map(int, input().split())
+# 0은 궤도가 깔려 있어 로봇이 갈 수 있는 지점이고, 1은 궤도가 없어 로봇이 갈 수 없는 지점
 lst = [list(map(int, input().split())) for _ in range(N)]
-sy, sx, sd = map(int, input().split())
-ey, ex, ed = map(int, input().split())
+def func(x):
+    return int(x) - 1
+# 로봇의 현재 위치와 바라보는 방향
+sy, sx, sd = map(func, input().split())
+# 로봇의 도착 위치와 바라보는 방향
+ey, ex, ed = map(func, input().split())
 
-sy, sx, sd, ey, ex, ed = sy - 1, sx - 1, sd - 1, ey - 1, ex - 1, ed - 1
-
-direction = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-left = [3, 2, 0, 1]
-right = [2, 3, 1, 0]
+directions = ((0, 1), (0, -1), (1, 0), (-1, 0))
+turn_left = (3, 2, 0, 1)
+turn_right = (2, 3, 1, 0)
 
 q = deque()
-q.append((sy, sx, sd, 0))
-
+q.append((0, sy, sx, sd))
 used = [[[21e8] * 4 for _ in range(M)] for _ in range(N)]
 used[sy][sx][sd] = 0
 
-result = 0
-
 while q:
-    y, x, d, cnt = q.popleft()
+    cnt, y, x, d = q.popleft()
 
+    if used[y][x][d] < cnt:
+        continue
+
+    # 최소 몇 번의 명령이 필요한지 구하는 프로그램
+    # 출발지점에서 도착지점까지는 항상 이동이 가능
     if y == ey and x == ex and d == ed:
-        result = cnt
+        print(cnt)
         break
 
+    # 명령 1. Go k: k는 1, 2 또는 3일 수 있다. 현재 향하고 있는 방향으로 k칸 만큼 움직인다.
     for k in range(1, 4):
-        dy, dx = y + direction[d][0] * k, x + direction[d][1] * k
-
-        if not (0 <= dy < N and 0 <= dx < M) or lst[dy][dx]:
+        ny, nx = y + directions[d][0] * k, x + directions[d][1] * k
+        if not(0 <= ny < N and 0 <= nx < M):
             break
+        if lst[ny][nx]:
+            break
+        if used[ny][nx][d] > cnt + 1:
+            used[ny][nx][d] = cnt + 1
+            q.append((cnt + 1, ny, nx, d))
 
-        if used[dy][dx][d] > cnt + 1:
-            used[dy][dx][d] = cnt + 1
-            q.append((dy, dx, d, cnt + 1))
-    
-    if used[y][x][left[d]] > cnt + 1:
-        used[y][x][left[d]] = cnt + 1
-        q.append((y, x, left[d], cnt + 1))
-
-    if used[y][x][right[d]] > cnt + 1:
-        used[y][x][right[d]] = cnt + 1
-        q.append((y, x, right[d], cnt + 1))
-
-print(result)
+    # 명령 2. Turn dir: dir은 left 또는 right 이며, 각각 왼쪽 또는 오른쪽으로 90° 회전한다.
+    if used[y][x][turn_left[d]] > cnt + 1:
+        used[y][x][turn_left[d]] = cnt + 1
+        q.append((cnt + 1, y, x, turn_left[d]))
+    if used[y][x][turn_right[d]] > cnt + 1:
+        used[y][x][turn_right[d]] = cnt + 1
+        q.append((cnt + 1, y, x, turn_right[d]))
