@@ -20,31 +20,35 @@ directions = ((0, 1), (1, 0), (0, -1), (-1, 0))
 # 플레이어는 상, 하, 좌, 우로 이동할 수 있고 이동에 소요되는 시간은 1초
 arrived = []
 
-for i in range(N):
-    for j in range(M):
-        # 알파벳 소문자는 플레이어의 아이디
-        if not lst[i][j].islower():
-            continue
+def bfs():
+    for i in range(N):
+        for j in range(M):
+            if lst[i][j] != 'B':
+                continue
 
-        q = deque()
-        q.append((i, j))
+            q = deque()
+            q.append((i, j))
 
-        used = [[0] * M for _ in range(N)]
-        used[i][j] = 1
+            used = [[0] * M for _ in range(N)]
+            used[i][j] = 1
 
-        while q:
-            y, x = q.popleft()
+            while q:
+                y, x = q.popleft()
 
-            if lst[y][x] == 'B':
-                arrived.append((used[y][x] - 1, players[lst[i][j]]))
-                break
+                if lst[y][x].islower():
+                    arrived.append((used[y][x] - 1, players[lst[y][x]]))
 
-            for dy, dx in directions:
-                ny, nx = y + dy, x + dx
-                # 한 지점에 여러명의 플레이어가 위치할 수 있다
-                if 0 <= ny < N and 0 <= nx < M and not used[ny][nx] and lst[ny][nx] != 'X':
-                    used[ny][nx] = used[y][x] + 1
-                    q.append((ny, nx))
+                for dy, dx in directions:
+                    ny, nx = y + dy, x + dx
+                    # 알파벳 소문자는 플레이어의 아이디
+                    # 한 지점에 여러명의 플레이어가 위치할 수 있다
+                    if 0 <= ny < N and 0 <= nx < M and not used[ny][nx] and lst[ny][nx] != 'X':
+                        used[ny][nx] = used[y][x] + 1
+                        q.append((ny, nx))
+
+            return
+
+bfs()
 
 # 이동한 경우 공격을 바로 시작
 # 공격에 소모되는 시간은 1초이며
