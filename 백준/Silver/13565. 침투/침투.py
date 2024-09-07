@@ -3,35 +3,29 @@ from collections import deque
 N, M = map(int, input().split())
 lst = [input() for _ in range(N)]
 
-q = deque()
+directions = ((0, 1), (1, 0), (0, -1), (-1, 0))
+
 used = [[0] * M for _ in range(N)]
 
-result = 'NO'
+def bfs():
+    # 격자의 위쪽을 바깥쪽(outer side), 아래쪽을 안쪽(inner side)
+    for j in range(M):
+        if not used[0][j] and lst[0][j] == '0':
+            used[0][j] = 1
 
-def bfs(m):
-    global result
+            q = deque()
+            q.append((0, j))
 
-    used[0][m] = 1
-    q.append((0, m))
+            while q:
+                y, x = q.popleft()
 
-    while q:
-        y, x = q.popleft()
+                if y == N - 1:
+                    return 1
+                
+                for dy, dx in directions:
+                    ny, nx = y + dy, x + dx
+                    if 0 <= ny < N and 0 <= nx < M and not used[ny][nx] and lst[ny][nx] == '0':
+                        used[ny][nx] = 1
+                        q.append((ny, nx))
 
-        if y == N - 1:
-            result = 'YES'
-            return
-        
-        for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
-            ny, nx = y + dy, x + dx
-            if 0 <= ny < N and 0 <= nx < M and not used[ny][nx] and lst[ny][nx] == '0':
-                used[ny][nx] = 1
-                q.append((ny, nx))
-
-for m in range(M):
-    if not used[0][m] and lst[0][m] == '0':
-        bfs(m)
-
-    if result == 'YES':
-        break
-
-print(result)
+print('YES' if bfs() else 'NO')
