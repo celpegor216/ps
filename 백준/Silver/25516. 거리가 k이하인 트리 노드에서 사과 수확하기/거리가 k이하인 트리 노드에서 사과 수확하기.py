@@ -1,5 +1,4 @@
-import sys
-sys.setrecursionlimit(10 ** 5)
+from collections import deque
 
 
 N, K = map(int, input().split())
@@ -10,18 +9,17 @@ for _ in range(N - 1):
 has_apple = list(map(int, input().split()))
 
 result = 0
-def dfs(level, now):
-    global result
 
-    if has_apple[now]:
-        result += 1
-    
-    if level == K:
-        return
-    
-    for child in children[now]:
-        dfs(level + 1, child)
+q = deque()
+q.append(0)
 
-dfs(0, 0)
+for _ in range(K + 1):
+    for _ in range(len(q)):
+        now = q.popleft()
+
+        result += has_apple[now]
+
+        for child in children[now]:
+            q.append(child)
 
 print(result)
