@@ -1,67 +1,72 @@
-from collections import deque
+# 광진구 스터디 코드 리뷰 내용 참조
+
 
 N, M, D = map(int, input().split())
-lst = [list(map(int, input().split())) for _ in range(N)]
 
-used = [0] * M
+# (i번 위치에서 적까지의 거리, 적의 x좌표, y좌표, 적의 번호) * 적의 수 만큼
+distances_from_position_to_enemy = [[] for _ in range(M)]
+# 적의 수
+length = 0
+for n in range(N):
+    tmp = list(map(int, input().split()))
+
+    for m in range(M):
+        if not tmp[m]:
+            continue
+
+        for p in range(M):
+            distances_from_position_to_enemy[p].append((N - n + abs(m - p), m, n, length))
+
+        length += 1
+
+for p in range(M):
+    distances_from_position_to_enemy[p].sort()
+
+
+def find_target(a, d):
+    t = -1
+    while a < length:
+        if d[a][0] - n > D:
+            break
+
+        if d[a][2] >= N - n:
+            a += 1
+            continue
+
+        if used[d[a][3]]:
+            a += 1
+            continue
+
+        t = d[a][3]
+        a += 1
+        break
+
+    return a, t
+
 result = 0
+for i in range(M - 2):
+    d1 = distances_from_position_to_enemy[i]
+    for j in range(i + 1, M - 1):
+        d2 = distances_from_position_to_enemy[j]
+        for k in range(j + 1, M):
+            d3 = distances_from_position_to_enemy[k]
 
-def dfs(start, level, positions):
-    global result
+            # 죽은 적 체크
+            used = [0] * length
 
-    if level == 3:
-        total_attack = set()
+            # 각 궁수 별 포인터
+            a1 = a2 = a3 = 0
 
-        for n in range(N):
-            attack = set()
+            for n in range(N):
+                # 각 궁수 별 이번 턴의 타겟
+                a1, t1 = find_target(a1, d1)
+                a2, t2 = find_target(a2, d2)
+                a3, t3 = find_target(a3, d3)
 
-            for pos in positions:
-                q = deque()
-                q.append((N - n - 1, pos))
+                for t in (t1, t2, t3):
+                    if t != -1:
+                        used[t] = 1
 
-                tmp_used = [[0] * M for _ in range(N)]
-                tmp_used[N - n - 1][pos] = 1
-
-                ry = N
-                rx = M
-                rc = D
-
-                while q:
-                    y, x = q.popleft()
-
-                    if tmp_used[y][x] > rc:
-                        break
-
-                    if lst[y][x] == 1 and (y, x) not in total_attack:
-                        if tmp_used[y][x] < rc:
-                            ry = y
-                            rx = x
-                            rc = tmp_used[y][x]
-                        elif tmp_used[y][x] == rc and rx > x:
-                            ry = y
-                            rx = x
-                        else:
-                            continue
-
-                    for dy, dx in ((0, 1), (0, -1), (-1, 0)):
-                        ny, nx = y + dy, x + dx
-                        if 0 <= ny < N - n and 0 <= nx < M and not tmp_used[ny][nx] and (ny, nx) not in total_attack:
-                            tmp_used[ny][nx] = tmp_used[y][x] + 1
-                            q.append((ny, nx))
-
-                if 0 <= ry < N - n and 0 <= rx < M:
-                    attack.add((ry, rx))
-
-            total_attack = total_attack.union(attack)
-        result = max(result, len(total_attack))
-        return
-
-    for i in range(start + 1, M):
-        if not used[i]:
-            used[i] = 1
-            dfs(i, level + 1, positions + [i])
-            used[i] = 0
-
-dfs(-1, 0, [])
+            result = max(result, used.count(1))
 
 print(result)
