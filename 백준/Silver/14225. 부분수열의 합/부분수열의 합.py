@@ -1,25 +1,22 @@
 N = int(input())
-lst = list(map(int, input().split()))
+lst = sorted(map(int, input().split()))
 
-s = set()
+used = set()
+def dfs(level, start, total):
+    used.add(total)
 
-used = [0] * N
-def dfs(now, total):
-    s.add(total)
+    if start == N:
+        return
 
-    for n in range(now + 1, N):
-        if not used[n]:
-            used[n] = 1
-            dfs(n, total + lst[n])
-            used[n] = 0
+    for i in range(start, N):
+        dfs(level + 1, i + 1, total + lst[i])
 
-dfs(-1, 0)
+dfs(0, 0, 0)
 
-result = 1
-
-while 1:
-    if result not in s:
-        print(result)
+used = sorted(used)
+for i in range(1, len(used)):
+    if used[i] > i:
+        print(i)
         break
-
-    result += 1
+else:
+    print(i + 1)
