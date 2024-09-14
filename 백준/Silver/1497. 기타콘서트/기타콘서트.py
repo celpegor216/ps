@@ -1,28 +1,36 @@
 N, M = map(int, input().split())
+lst = [set() for _ in range(N)]
+for n in range(N):
+    _, songs = input().split()
 
-guitars = []
+    for m in range(M):
+        if songs[m] == 'Y':
+            lst[n].add(m)
 
-for _ in range(N):
-    name, songs = input().split()
-    guitars.append(songs)
+max_songs = 0
+min_guitars = N
 
-result_songs = 0
-result_cnt = -1
+def dfs(level, guitars, songs):
+    global max_songs, min_guitars
 
-def dfs(level, start, songs, cnt):
-    global result_songs, result_cnt
+    length = len(songs)
+
+    if length > max_songs or (length == max_songs and guitars < min_guitars):
+        max_songs = length
+        min_guitars = guitars
+
+    if level == N:
+        return
     
-    if sum(songs) > result_songs or (sum(songs) == result_songs and cnt < result_cnt):
-        result_songs = sum(songs)
-        result_cnt = cnt
+    # level번째 기타를 넣지 않음
+    dfs(level + 1, guitars, songs)
 
-    for n in range(start, N):
-        tmp = songs[:]
-        for m in range(M):
-            if guitars[n][m] == 'Y':
-                tmp[m] = 1
-        dfs(level + 1, n + 1, tmp, cnt + 1)
-    
-dfs(0, 0, [0] * M, 0)
+    # level번째 기타를 넣음
+    dfs(level + 1, guitars + 1, songs.union(lst[level]))
 
-print(result_cnt)
+dfs(0, 0, set())
+
+if max_songs > 0:
+    print(min_guitars)
+else:
+    print(-1)
