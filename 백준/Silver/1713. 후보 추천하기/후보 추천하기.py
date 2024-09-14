@@ -1,25 +1,29 @@
+# heapq 쓸 수 있을 것 같은데 추천 횟수 늘렸을 때 자동으로 재정렬 될지 모르겠음
+
 N = int(input())
-dic = dict()
+Q = int(input())
+lst = list(map(int, input().split()))
 
-T = int(input())
-polls = list(map(int, input().split()))
+frames = []
 
-for t in range(T):
-    if polls[t] in dic.keys():
-        dic[polls[t]][1] += 1
+for item in lst:
+    min_value = Q + 1
+    min_idx = []
+    length = len(frames)
+
+    for i in range(length):
+        if min_value > frames[i][1]:
+            min_value = frames[i][1]
+            min_idx = [i]
+        elif min_value == frames[i][1]:
+            min_idx.append(i)
+
+        if frames[i][0] == item:
+            frames[i][1] += 1
+            break
     else:
-        if len(dic.keys()) >= N:
-            minv = 21e8
-            oldidx = 21e8
+        if length == N:
+            frames.pop(min_idx[0])
+        frames.append([item, 1])
 
-            for key in dic.keys():
-                if dic[key][1] < minv:
-                    minv = dic[key][1]
-                    oldidx = key
-                elif dic[key][1] == minv and dic[key][0] < dic[oldidx][0]:
-                    oldidx = key
-            
-            dic.pop(oldidx)
-        dic[polls[t]] = [t, 1]
-
-print(*sorted(dic.keys()))
+print(*sorted([frame[0] for frame in frames]))
