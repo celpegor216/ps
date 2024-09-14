@@ -1,37 +1,41 @@
 from collections import deque
 
 N, M, K = map(int, input().split())
-lst = [[0] * M for _ in range(N)]
 
-for _ in range(K):
-    y, x = map(int, input().split())
+# y, x 좌표의 음식물의 번호, 사용 여부
+dic = dict()
 
-    lst[y - 1][x - 1] = 1
-
-used = [[0] * M for _ in range(N)]
+for k in range(1, K + 1):
+    y, x = map(lambda x: int(x) - 1, input().split())
+    dic[y * M + x] = [k, 0]
 
 result = 0
 
-for n in range(N):
-    for m in range(M):
-        if lst[n][m] and not used[n][m]:
-            used[n][m] = 1
+directions = ((0, 1), (1, 0), (0, -1), (-1, 0))
 
-            q = deque()
-            q.append((n, m))
-            cnt = 0
+for key, value in dic.items():
+    if value[1]:
+        continue
 
-            while q:
-                y, x = q.popleft()
+    dic[key][1] = 1
 
+    q = deque()
+    q.append((key // M, key % M))
+
+    cnt = 1
+
+    while q:
+        y, x = q.popleft()
+
+        for dy, dx in directions:
+            ny, nx = y + dy, x + dx
+            nkey = ny * M + nx
+
+            if 0 <= ny < N and 0 <= nx < M and dic.get(nkey) and not dic[nkey][1]:
+                dic[nkey][1] = 1
+                q.append((ny, nx))
                 cnt += 1
-
-                for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
-                    ny, nx = dy + y, dx + x
-                    if 0 <= ny < N and 0 <= nx < M and lst[ny][nx] and not used[ny][nx]:
-                        used[ny][nx] = 1
-                        q.append((ny, nx))
-            
-            result = max(result, cnt)
+    
+    result = max(result, cnt)
 
 print(result)
