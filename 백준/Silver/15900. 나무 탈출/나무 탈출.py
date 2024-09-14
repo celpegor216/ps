@@ -1,39 +1,44 @@
-# 간선이 위에서부터 주어지지 않는다면 어떻게 트리를 그려야하지?
-
+from collections import deque
 import sys
-sys.setrecursionlimit(600000)
+input = sys.stdin.readline
+
 
 N = int(input())
-dic = dict()
 
-for n in range(N - 1):
+lst = [[] for _ in range(N + 1)]
+
+for _ in range(N - 1):
     a, b = map(int, input().split())
-    
-    if dic.get(a):
-        dic[a].append(b)
-    else:
-        dic[a] = [b]
-    
-    if dic.get(b):
-        dic[b].append(a)
-    else:
-        dic[b] = [a]
+    lst[a].append(b)
+    lst[b].append(a)
 
+# 모든 리프 노드의 level 총합
 total = 0
-def dfs(level, parent, now):
-    global total
 
-    if now != 1 and len(dic[now]) == 1:
-        total += level
-        return
+# 루트 노드는 1번
+q = deque()
+q.append(1)
 
-    for item in dic[now]:
-        if item == parent: continue
-        dfs(level + 1, now, item)
+used = [0] * (N + 1)
+used[1] = 1
 
-dfs(0, 0, 1)
+level = 0
+while q:
+    for _ in range(len(q)):
+        now = q.popleft()
+        
+        flag = 0
+        for child in lst[now]:
+            if used[child]:
+                continue
+        
+            flag = 1
+            used[child] = 1
+            q.append(child)
+        
+        if not flag:
+            total += level
+    
+    level += 1
 
-if not total % 2:
-    print('No')
-else:
-    print('Yes')
+print('Yes' if total % 2 else 'No')
