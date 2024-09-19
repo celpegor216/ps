@@ -1,33 +1,35 @@
 from collections import deque
 
+
 N, M = map(int, input().split())
+MAX = 100
+board = [n for n in range(MAX + 1)]
 
-moves = {}
+for _ in range(N + M):
+    a, b = map(int, input().split())
+    board[a] = b
 
-for i in range(N + M):
-    start, end = map(int, input().split())
-    moves.update({start: end})
-
-def bfs():
+def find():
     q = deque()
-    used = [0] * 101
+    q.append(1)
 
-    q.append((1, 0))
+    used = [0] * (MAX + 1)
     used[1] = 1
 
+    result = 0
     while q:
-        nown, nowc = q.popleft()
+        for _ in range(len(q)):
+            now = q.popleft()
 
-        if nown == 100:
-            return nowc
+            if now == MAX:
+                return result
 
-        for i in range(1, 7):
-            nextn = nown + i
-            if 0 < nextn <= 100 and not used[nextn]:
-                used[nextn] = 1
-                if nextn in moves.keys():
-                    q.append((moves[nextn], nowc + 1))
-                else:
-                    q.append((nextn, nowc + 1))
+            for i in range(1, 7):
+                nxt = now + i
+                if nxt <= MAX and not used[nxt]:
+                    used[nxt] = 1
+                    q.append(board[nxt])
 
-print(bfs())
+        result += 1
+
+print(find())
