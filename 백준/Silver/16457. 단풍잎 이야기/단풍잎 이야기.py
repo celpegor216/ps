@@ -7,16 +7,16 @@ def dfs(level, start, now):
     global result
 
     if level == N:
-        completed_quests = [0] * M
+        total = 0
 
         for m in range(M):
             for skill in lst[m]:
                 if skill not in now:
                     break
             else:
-                completed_quests[m] = 1
+                total += 1
         
-        result = max(result, sum(completed_quests))
+        result = max(result, total)
         return
     
     for n in range(start, N * 2):
