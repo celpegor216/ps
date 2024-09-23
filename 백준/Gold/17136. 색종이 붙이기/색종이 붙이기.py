@@ -1,49 +1,62 @@
-# 해답: https://velog.io/@imnotmoon/Python-%EB%B0%B1%EC%A4%80-17136.-%EC%83%89%EC%A2%85%EC%9D%B4-%EB%B6%99%EC%9D%B4%EA%B8%B0
+N = 10
 
-lst = [list(map(int, input().split())) for _ in range(10)]
-left = [5] * 5
-result = 21e8
+lst = [list(map(int, input().split())) for _ in range(N)]
 
+result = 26
+papers = [0] * 6
+used = [[0] * N for _ in range(N)]
 def dfs(y, x, cnt):
-    global left, result
+    global result
 
-    if y >= 10:
-        result = min(result, cnt)
+    if cnt > result:
         return
-    
-    if x >= 10:
-        dfs(y + 1, 0, cnt)
+
+    if y == N:
+        result = cnt
         return
-    
-    if lst[y][x]:
-        for k in range(5):
-            if left[k] == 0: continue
-            if y + k >= 10 or x + k >= 10: continue
+
+    ny, nx = y, x + 1
+    if nx == N:
+        ny += 1
+        nx = 0
+
+    if not lst[y][x] or used[y][x]:
+        dfs(ny, nx, cnt)
+    else:
+        for i in range(1, 6):
+            if papers[i - 1] == 5:
+                continue
+
+            if y + i > N or x + i > N:
+                break
 
             flag = 0
-            for i in range(k + 1):
-                if flag: break
 
-                for j in range(k + 1):
-                    if not lst[y + i][x + j]:
+            for dy in range(i):
+                for dx in range(i):
+                    if not lst[y + dy][x + dx] or used[y + dy][x + dx]:
                         flag = 1
                         break
-            
-            if flag: break
 
-            for i in range(k + 1):
-                for j in range(k + 1):
-                    lst[y + i][x + j] = 0
-            left[k] -= 1
+                if flag:
+                    break
 
-            dfs(y, x + k + 1, cnt + 1)
+            if flag:
+                break
 
-            for i in range(k + 1):
-                for j in range(k + 1):
-                    lst[y + i][x + j] = 1
-            left[k] += 1
-    else:
-        dfs(y, x + 1, cnt)
+            papers[i - 1] += 1
+            for dy in range(i):
+                for dx in range(i):
+                    used[y + dy][x + dx] = 1
+
+            dfs(ny, nx, cnt + 1)
+
+            papers[i - 1] -= 1
+            for dy in range(i):
+                for dx in range(i):
+                    used[y + dy][x + dx] = 0
 
 dfs(0, 0, 0)
-print(-1 if result == 21e8 else result)
+
+print(result if result < 26 else -1)
+
