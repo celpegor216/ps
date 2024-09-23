@@ -1,34 +1,47 @@
-N = int(input())
-lst = [[21e8] * (N + 1) for _ in range(N + 1)]
+import heapq
 
-for n in range(N + 1):
-    lst[n][n] = 0
+
+N = int(input())
+lst = [[] for _ in range(N + 1)]
 
 while 1:
     a, b = map(int, input().split())
 
-    if a == b == -1:
+    if a == -1:
         break
 
-    lst[a][b] = 1
-    lst[b][a] = 1
+    lst[a].append(b)
+    lst[b].append(a)
 
-for k in range(1, N + 1):
-    for i in range(1, N + 1):
-        for j in range(1, N + 1):
-            lst[i][j] = min(lst[i][j], lst[i][k] + lst[k][j])
+MAX = 21e8
+result_v = MAX
+result_candidates = []
 
-minv = 21e8
-result = []
+for i in range(1, N + 1):
+    results = [MAX] * (N + 1)
+    results[i] = 0
 
-for n in range(1, N + 1):
-    maxv = max(lst[n][1:])
+    q = []
+    heapq.heappush(q, (0, i))
 
-    if maxv < minv:
-        minv = maxv
-        result = [n]
-    elif maxv == minv:
-        result.append(n)
+    while q:
+        cost, via = heapq.heappop(q)
 
-print(minv, len(result))
-print(*sorted(result))
+        if results[via] < cost:
+            continue
+
+        for nxt in lst[via]:
+            if results[nxt] > cost + 1:
+                results[nxt] = cost + 1
+                heapq.heappush(q, (cost + 1, nxt))
+
+    max_v = max(results[1:])
+    if max_v < result_v:
+        result_v = max_v
+        result_candidates = [i]
+    elif max_v == result_v:
+        result_candidates.append(i)
+
+
+print(result_v, len(result_candidates))
+print(*result_candidates)
