@@ -1,66 +1,62 @@
-from collections import deque
-
 N, M = map(int, input().split())
 lst = [list(map(int, input().split())) for _ in range(N)]
 
+# 2의 그룹 중 빈 칸이 2개 이하인 그룹을 찾고
+# [그룹에 속한 돌의 수, [채워야하는 칸 좌표]] 저장하기
+possible_groups = []
+possible_blanks = set()
 used = [[0] * M for _ in range(N)]
+for i in range(N):
+    for j in range(M):
+        if lst[i][j] != 2 or used[i][j]:
+            continue
 
-pairs = dict()
-result = 0
+        q = [(i, j)]
+        used[i][j] = 1
+        cnt = 1
+        blanks = set()
 
-for n in range(N):
-    for m in range(M):
-        if not used[n][m] and lst[n][m] == 2:
-            used[n][m] = 1
-            
-            q = deque()
-            q.append((n, m))
+        while q:
+            nq = []
 
-            cnt = 0
-            zeros = set()
-
-            while q:
-                cnt += 1
-                y, x = q.popleft()
-
+            for y, x in q:
                 for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
                     ny, nx = y + dy, x + dx
-                    if 0 <= ny < N and 0 <= nx < M and not used[ny][nx]:
-                        if lst[ny][nx] == 0:
-                            zeros.add((ny, nx))
-                        elif lst[ny][nx] == 2:
-                            used[ny][nx] = 1
-                            q.append((ny, nx))
+                    if not (0 <= ny < N and 0 <= nx < M) or lst[ny][nx] == 1 or used[ny][nx]:
+                        continue
 
-            if len(zeros) <= 2:
-                zeros = sorted(zeros)
-                key = str(len(zeros)) + str(zeros)
-                if pairs.get(key):
-                    pairs[key] += cnt
+                    if lst[ny][nx] == 2:
+                        used[ny][nx] = 1
+                        nq.append((ny, nx))
+                        cnt += 1
+                    elif lst[ny][nx] == 0:
+                        blanks.add((ny, nx))
+
+            q = nq
+
+        if len(blanks) <= 2:
+            possible_groups.append((cnt, blanks))
+            possible_blanks |= blanks
+
+
+possible_blanks = list(possible_blanks)
+length = len(possible_blanks)
+
+result = 0
+if length < 2:
+    for cnt, _ in possible_groups:
+        result += cnt
+else:
+    for i in range(length - 1):
+        for j in range(i + 1, length):
+            now = [possible_blanks[i], possible_blanks[j]]
+            total = 0
+            for cnt, blanks in possible_groups:
+                for blank in blanks:
+                    if blank not in now:
+                        break
                 else:
-                    pairs[key] = cnt
+                    total += cnt
 
-result = 0
-
-one = dict()
-two = dict()
-
-for key in pairs.keys():
-    if key[0] == '1':
-        one[key] = pairs[key]
-    else:
-        two[key] = pairs[key]
-
-for key in one.keys():
-    for key2 in two.keys():
-        if key[2:len(key) - 1] in key2:
-            two[key2] += one[key]
-
-result = 0
-if pairs:
-    if one:
-        result = sum(sorted(one.values(), reverse=True)[:2])
-    if two:
-        result = max(result, max(two.values()))
-
+            result = max(result, total)
 print(result)
