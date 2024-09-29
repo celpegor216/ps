@@ -15,27 +15,35 @@ for i in range(1, N - 1):
 
 
 directions = ((0, -1), (0, 1), (-1, 0), (1, 0))
+move_blanks = [
+    # top, up, right, down, left, bottom
+    [2, 1, 5, 3, 0, 4],
+    [4, 1, 0, 3, 5, 2],
+    [3, 0, 2, 5, 4, 1],
+    [1, 5, 2, 0, 4, 3],
+]
 
 
 # 감옥을 최소 몇 번 굴려야 당신이 게임에서 승리할 수 있을지 알아보자 > bfs
 # used 배열을 어떻게 만들 것인지가 관건
 def find():
-    # used[i][j][k]: 주사위의 바닥면이 k일 때 해당 칸에 도착한 적이 있는지 여부
-    used = [[set() for _ in range(M)] for _ in range(N)]
+    # used[i][j][k]: 주사위의 뚫려있는 면이 k에 있을 때 해당 칸에 도착 여부
+    # k는 0부터 5까지 top, up, right, down, left, bottom
+    used = [[[0] * 6 for _ in range(M)] for _ in range(N)]
 
     # 탐정은 자신이 있는 칸에 감옥의 뚫린 면이 바닥을 향하게 하여 놓는다
-    top, up, right, down, left, bottom = 0, 1, 2, 3, 4, 5
+    blank = 5
 
-    used[sy][sx].add((top, up, right, down, left, bottom))
+    used[sy][sx][blank] = 1
 
-    q = [(sy, sx, top, up, right, down, left, bottom)]
+    q = [(sy, sx, blank)]
     result = 0
     while q:
         nq = []
 
-        for y, x, t, u, r, d, l, b in q:
+        for y, x, blank in q:
             if y == ey and x == ex:
-                if b == 5:
+                if blank == 5:
                     return result
                 else:
                     continue
@@ -46,26 +54,13 @@ def find():
                 if lst[ny][nx] == '#':
                     continue
 
-                nt, nu, nr, nd, nl, nb = t, u, r, d, l, b
-
-                # 왼쪽으로 굴리기
-                if i == 0:
-                    nt, nr, nb, nl = nr, nb, nl, nt
-                # 오른쪽으로 굴리기
-                elif i == 1:
-                    nt, nr, nb, nl = nl, nt, nr, nb
-                # 위쪽으로 굴리기
-                elif i == 2:
-                    nt, nu, nb, nd = nd, nt, nu, nb
-                # 아래쪽으로 굴리기
-                else:
-                    nt, nu, nb, nd = nu, nb, nd, nt
+                nxt_blank = move_blanks[i][blank]
                 
-                if (nt, nu, nr, nd, nl, nb) in used[ny][nx]:
+                if used[ny][nx][nxt_blank]:
                     continue
                 
-                used[ny][nx].add((nt, nu, nr, nd, nl, nb))
-                nq.append((ny, nx, nt, nu, nr, nd, nl, nb))
+                used[ny][nx][nxt_blank] = 1
+                nq.append((ny, nx, nxt_blank))
 
         q = nq
         result += 1
