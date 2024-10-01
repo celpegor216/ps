@@ -1,32 +1,32 @@
-import heapq
 import sys
 input = sys.stdin.readline
 
-N = int(input())
-q = []
 
+N = int(input())
+
+lst = []
 for n in range(N):
     c, s = map(int, input().split())
-    heapq.heappush(q, (s, c, n))
+    lst.append((s, c, n))
 
-memo = [0] * (N + 1)
+lst.sort()
+
 total = 0
+colors_total = dict()
+now_size = 0
+tmp_total = dict()
+
 result = [0] * N
-now = 0
-cnt = []
+for s, c, n in lst:
+    if now_size != s:
+        for key, value in tmp_total.items():
+            colors_total[key] = colors_total.get(key, 0) + value
+            total += value
+        now_size = s
+        tmp_total = dict()
 
-for n in range(N):
-    s, c, n = heapq.heappop(q)
-    memo[c] += s
-    total += s
+    result[n] = total - colors_total.get(c, 0)
+    tmp_total[c] = tmp_total.get(c, 0) + s
 
-    if now < s:
-        now = s
-        cnt = [c]
-    else:
-        cnt.append(c)
-
-    result[n] = total - memo[c] - s * (len(cnt) - cnt.count(c))
-
-for n in range(N):
-    print(result[n])
+for item in result:
+    print(item)
