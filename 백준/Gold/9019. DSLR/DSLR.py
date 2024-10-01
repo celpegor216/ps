@@ -1,54 +1,49 @@
-# 힌트: 123의 L은 1230이고 R은 3012이다
+TC = int(input())
 
-from collections import deque
+MAX = 10 ** 4
+LEFT = 10 ** 3
 
-T = int(input())
-
-def bfs(A, B):
-    q = deque()
-    used = [0] * 10001
-
-    q.append((A, ''))
+def find():
+    used = [0] * MAX
     used[A] = 1
 
+    q = [(A, '')]
+
     while q:
-        nowa, nowp = q.popleft()
+        nq = []
 
-        if nowa == B:
-            return nowp
+        for now, path in q:
+            if now == B:
+                return path
 
-        # D연산 수행
-        D = nowa * 2 % 10000
-        if not used[D]:
-            q.append((D, nowp + 'D'))
-            used[D] = 1
+            # D
+            nxt = (now * 2) % MAX
+            if not used[nxt]:
+                used[nxt] = 1
+                nq.append((nxt, path + 'D'))
 
-        # S연산 수행
-        S = nowa - 1 if nowa != 0 else 9999
-        if not used[S]:
-            q.append((S, nowp + 'S'))
-            used[S] = 1
+            # S
+            nxt = (now - 1) % MAX
+            if not used[nxt]:
+                used[nxt] = 1
+                nq.append((nxt, path + 'S'))
 
-        # L연산 수행
-        string = str(nowa)
+            # L
+            nxt = (now % LEFT) * 10 + now // LEFT
+            if not used[nxt]:
+                used[nxt] = 1
+                nq.append((nxt, path + 'L'))
 
-        if len(string) < 4:
-            string = '0' * (4 - len(string)) + string
+            # R
+            nxt = (now % 10) * LEFT + now // 10
+            if not used[nxt]:
+                used[nxt] = 1
+                nq.append((nxt, path + 'R'))
 
-        L = int(string[1:] + string[0])
-        if not used[L]:
-            q.append((L, nowp + 'L'))
-            used[L] = 1
+        q = nq
 
-        # R연산 수행
-        R = int(string[-1] + string[:-1])
-        if not used[R]:
-            q.append((R, nowp + 'R'))
-            used[R] = 1
 
-for t in range(T):
+for _ in range(TC):
     A, B = map(int, input().split())
 
-    result = bfs(A, B)
-
-    print(result)
+    print(find())
