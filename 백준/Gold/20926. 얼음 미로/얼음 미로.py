@@ -1,12 +1,9 @@
 import heapq
 
+
 M, N = map(int, input().split())
 lst = []
 sy = sx = -1
-rocks = []
-
-directions = ((0, 1), (1, 0), (0, -1), (-1, 0))
-
 for i in range(N):
     tmp = list(input())
     for j in range(M):
@@ -19,19 +16,23 @@ for i in range(N):
             tmp[j] = -1
         elif tmp[j] == 'R':    # 바위, 만나면 멈춤
             tmp[j] = -2
-            rocks.append((i, j))
         elif tmp[j] == 'E':    # 탈출
             tmp[j] = -3
     lst.append(tmp)
 
 
-edges = dict()
+used = [[21e8] * M for _ in range(N)]
+used[sy][sx] = 0
+q = []
+heapq.heappush(q, (0, sy, sx))
 
-
-def find_edge(y, x):
-    for dy, dx in directions:
-        nt = lst[y][x]
+result = 21e8
+while q:
+    t, y, x = heapq.heappop(q)
+    for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
         ny, nx = y + dy, x + dx
+        nt = t
+
         while 0 <= ny < N and 0 <= nx < M and lst[ny][nx] >= 0:
             nt += lst[ny][nx]
             ny += dy
@@ -41,60 +42,19 @@ def find_edge(y, x):
         if not (0 <= ny < N and 0 <= nx < M) or lst[ny][nx] == -1:
             continue
 
-        if lst[ny][nx] == -2:
-            ny -= dy
-            nx -= dx
-
-        if y == ny and x == nx:
+        if lst[ny][nx] == -3:
+            result = min(result, nt)
             continue
 
-        if not edges.get((y, x)):
-            edges[(y, x)] = dict()
-        edges[(y, x)][(ny, nx)] = nt
+        ny -= dy
+        nx -= dx
 
-
-possibles = set()
-possibles.add((sy, sx))
-for y, x in rocks:
-    for dy, dx in directions:
-        ny, nx = y + dy, x + dx
-        if not (0 <= ny < N and 0 <= nx < M) or lst[ny][nx] < 0:
-            continue
-        possibles.add((ny, nx))
-
-for y, x in possibles:
-    find_edge(y, x)
-
-
-def find():
-    q = []
-    heapq.heappush(q, (0, sy, sx))
-    results = [[21e8] * M for _ in range(N)]
-    results[sy][sx] = 0
-
-    while q:
-        cost, y, x = heapq.heappop(q)
-
-        if results[y][x] < cost:
+        # 도착한 곳까지 걸린 미끌 시간이 더 오래 걸린 경우
+        if used[ny][nx] <= nt:
             continue
 
-        if lst[y][x] == -3:
-            return cost - 3
-
-        if not edges.get((y, x)):
-            continue
-
-        for nxt_pos, nxt_cost in edges[(y, x)].items():
-            ny, nx = nxt_pos
-            nxt = cost + nxt_cost - lst[ny][nx]
-
-            if results[ny][nx] <= nxt:
-                continue
-
-            results[ny][nx] = nxt
-            heapq.heappush(q, (nxt, ny, nx))
+        used[ny][nx] = nt
+        heapq.heappush(q, (nt, ny, nx))
 
 
-    return -1
-
-print(find())
+print(result if result != 21e8 else -1)
