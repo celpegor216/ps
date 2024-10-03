@@ -1,111 +1,112 @@
-# 4×4크기
-N = 4
-K = N ** 2
-# 한 칸에는 물고기가 한 마리, 각 물고기는 번호와 방향
-# 번호는 1보다 크거나 같고, 16보다 작거나 같은 자연수이며,
-# 두 물고기가 같은 번호를 갖는 경우는 없다
-# ai는 물고기의 번호, bi는 방향
-fish = [[] for _ in range(K + 1)]
-lst = []
-for i in range(N):
-    tmp = list(map(int, input().split()))
-    line = []
-
-    for j in range(N):
-        a, b = tmp[j * 2], tmp[j * 2 + 1]
-        fish[a] = [i, j, b - 1]
-        line.append(a)
-
-    lst.append(line)
+def noob(i, j):
+    return 0<=i<4 and 0<=j<4
 
 
-# 방향은 8가지 방향, 1부터 순서대로 ↑, ↖, ←, ↙, ↓, ↘, →, ↗
-D = 8
-directions = ((-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1))
+def move_fish(sea, fish):
+    for n in range(1, 17):
+        if fish[n]:
+            i, j = fish[n][0], fish[n][1]
+            d = fish[n][2]
+            di, dj = DIR[d]
+            ni, nj = i+di, j+dj
+            if noob(ni, nj) and sea[ni][nj] != -1:
+                if sea[ni][nj] == 0:  # 빈 칸일 때
+                    fish[n] = [ni, nj, d]
+                    sea[ni][nj] = n
+                    sea[i][j] = 0
+                else:  # 다른 물고기가 있을 때
+                    ano_fish = sea[ni][nj]
+                    fish[n] = [ni, nj, d]
+                    fish[ano_fish][0], fish[ano_fish][1] = i, j
+                    sea[i][j], sea[ni][nj] = sea[ni][nj], sea[i][j]
 
-# 청소년 상어는 (0, 0)에 있는 물고기를 먹고, (0, 0)에 들어가게 된다
-# 상어의 방향은 (0, 0)에 있던 물고기의 방향과 같다.
-start_d = fish[lst[0][0]][-1]
-start_total = lst[0][0]
-fish[lst[0][0]] = []
-lst[0][0] = -1
-
-result = start_total
-def dfs(now_lst, now_fish, sy, sx, sd, total):
-    global result
-
-    result = max(result, total)
-
-    # 물고기가 번호가 작은 물고기부터 순서대로 이동
-    moved_lst = [line[:] for line in now_lst]
-    moved_fish = [line[:] for line in now_fish]
-
-    for k in range(1, K + 1):
-        # 이미 잡아먹힌 물고기는 건너뛰기
-        if not moved_fish[k]:
-            continue
-
-        y, x, d = moved_fish[k]
-
-        # 물고기는 한 칸을 이동할 수 있고,
-        # 각 물고기는 방향이 이동할 수 있는 칸을 향할 때까지 방향을 45도 반시계 회전시킨다.
-        # 만약, 이동할 수 있는 칸이 없으면 이동을 하지 않는다
-        for _ in range(D):
-            dy, dx = directions[d]
-            ny, nx = y + dy, x + dx
-
-            # 이동할 수 없는 칸은 상어가 있거나, 공간의 경계를 넘는 칸
-            if not (0 <= ny < N and 0 <= nx < N) or moved_lst[ny][nx] == -1:
-                d = (d + 1) % D
-                continue
-
-            # 이동할 수 있는 칸은 빈 칸과 다른 물고기가 있는 칸,
-            if not moved_lst[ny][nx]:
-                moved_lst[y][x], moved_lst[ny][nx] = moved_lst[ny][nx], moved_lst[y][x]
-                moved_fish[k] = [ny, nx, d]
             else:
-            # 물고기가 다른 물고기가 있는 칸으로 이동할 때는 서로의 위치를 바꾸는 방식
-                oppo = moved_lst[ny][nx]
-                moved_lst[y][x], moved_lst[ny][nx] = moved_lst[ny][nx], moved_lst[y][x]
-                moved_fish[k] = [ny, nx, d]
-                moved_fish[oppo][0] = y
-                moved_fish[oppo][1] = x
-            break
+                cnt = 0
+                while 1:
+                    if noob(ni, nj) and sea[ni][nj] != -1:
+                        break
+                    if cnt == 8:
+                        break
+                    d = (d+1)%8
+                    di, dj = DIR[d]
+                    ni, nj = i+di, j+dj
+                    cnt += 1
+                if cnt != 8:
+                    if sea[ni][nj] == 0:
+                        fish[n] = [ni, nj, d]
+                        sea[ni][nj] = n
+                        sea[i][j] = 0
+                    else:
+                        ano_fish = sea[ni][nj]
+                        fish[n] = [ni, nj, d]
+                        fish[ano_fish][0], fish[ano_fish][1] = i, j
+                        sea[i][j], sea[ni][nj] = sea[ni][nj], sea[i][j]
+    return sea, fish
 
 
-    # 물고기의 이동이 모두 끝나면 상어가 이동
-    # 상어는 방향에 있는 칸으로 이동할 수 있는데, 한 번에 여러 개의 칸을 이동할 수 있다.
-    # 이동하는 중에 지나가는 칸에 있는 물고기는 먹지 않는다.
-    dy, dx = directions[sd]
-    ny, nx = sy, sx
-    for _ in range(N):
-        ny += dy
-        nx += dx
+def move_shark(res, arr, shark, fish, ni, nj):
+    sx, sy = shark[0], shark[1]
+    if noob(ni, nj) and arr[ni][nj] != 0:  # iob고 물고기가 있을 때
+        tmp_fish = arr[ni][nj]
+        res += tmp_fish
+        shark = [ni, nj, fish[tmp_fish][2]]
+        fish[tmp_fish] = []
+        arr[sx][sy] = 0
+        arr[ni][nj] = -1
 
-        if not(0 <= ny < N and 0 <= nx < N):
-            break
-
-        # 물고기가 없는 칸으로는 이동할 수 없다.
-        if not moved_lst[ny][nx]:
-            continue
-
-        # 상어가 물고기가 있는 칸으로 이동했다면, 그 칸에 있는 물고기를 먹고,
-        # 그 물고기의 방향을 가지게 된다.
-        nxt_lst = [line[:] for line in moved_lst]
-        nxt_fish = [line[:] for line in moved_fish]
-        nxt_total = total
-
-        f = nxt_lst[ny][nx]
-        nxt_total += f
-        nxt_lst[sy][sx] = 0
-        nxt_lst[ny][nx] = -1
-        nd = nxt_fish[f][-1]
-        nxt_fish[f] = []
-
-        dfs(nxt_lst, nxt_fish, ny, nx, nd, nxt_total)
+    return arr, shark, fish, res
 
 
-dfs(lst, fish, 0, 0, start_d, start_total)
+def dfs(res, arr, fish, shark):
+    global total
 
-# 상어가 먹을 수 있는 물고기 번호의 합의 최댓값
-print(result)
+    sx, sy, sd = shark
+    di, dj = DIR[sd]
+    cnt = 0
+
+    for mul in range(1, 4):
+        ni, nj = sx+di*mul, sy+dj*mul
+        if noob(ni, nj) and arr[ni][nj] != 0 and arr[ni][nj] != -1:  # oob가 아니고 물고기가 있는 칸만
+            tmp_arr = [lst[:] for lst in arr]
+            tmp_fish = [lst[:] for lst in fish]
+            tmp_shark = shark[:]
+
+            new_arr, new_shark, renew_info, tot = move_shark(res, tmp_arr, tmp_shark, tmp_fish, ni, nj)
+            new_arr, renew_info = move_fish(new_arr, renew_info)
+            dfs(tot, new_arr, renew_info, new_shark)
+        else:
+            cnt += 1
+    if cnt == 3:  # 이동 못할 때 return 처리 해주기
+        total = max(total, res)
+        return
+
+
+sea = [[0 for _ in range(4)] for _ in range(4)]
+DIR = [(-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1)]
+fish = [[] for _ in range(17)]
+i, j = 0, 0
+total = 0  # 최종 출력 변수
+for _ in range(4):
+    a, b, c, d, e, f, g, h = map(int, input().split())
+    fish[a] = [i, j, b-1]
+    fish[c] = [i, j+1, d-1]
+    fish[e] = [i, j+2, f-1]
+    fish[g] = [i, j+3, h-1]
+    sea[i][j] = a
+    sea[i][j+1] = c
+    sea[i][j+2] = e
+    sea[i][j+3] = g
+    i += 1
+
+# 상어의 시작 위치와, 시작 지점에 있는 물고기 먹고 시작해줌
+shark = [0, 0, fish[sea[0][0]][2]]
+fish[sea[0][0]] = []
+total += sea[0][0]
+sea[0][0] = -1  # 상어는 -1로 표시해주기
+
+# 물고기 한 번 이동한 뒤, 상어가 움직이는 것부터 케이스가 갈리니까
+# 초기 물고기 이동은 메인에서 함수 돌려주고, 상어가 움직이는 것부터는 dfs 안에서 돌려주기
+
+sea, fish = move_fish(sea, fish)
+dfs(total, sea, fish, shark)
+print(total)
