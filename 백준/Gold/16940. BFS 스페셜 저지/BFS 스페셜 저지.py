@@ -5,11 +5,11 @@ input = sys.stdin.readline
 
 
 N = int(input())
-lst = [[] for _ in range(N + 1)]
+lst = [set() for _ in range(N + 1)]
 for _ in range(N - 1):
     a, b = map(int, input().split())
-    lst[a].append(b)
-    lst[b].append(a)
+    lst[a].add(b)
+    lst[b].add(a)
 orders = list(map(int, input().split()))
 
 
