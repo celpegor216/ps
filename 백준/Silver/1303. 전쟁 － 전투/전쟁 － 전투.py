@@ -1,42 +1,38 @@
-from collections import deque
+M, N = map(int, input().split())
+lst = [input() for _ in range(N)]
 
-N, M = map(int, input().split())
-lst = [input() for _ in range(M)]
+directions = ((0, 1), (1, 0), (0, -1), (-1, 0))
 
-white = 0
-blue = 0
+W = B = 0
+used = [[0] * M for _ in range(N)]
 
-used = [[0] * N for _ in range(M)]
 
-def bfs(y, x):
-    q = deque()
-    q.append((y, x))
+for i in range(N):
+    for j in range(M):
+        if used[i][j]:
+            continue
+        
+        q = [(i, j)]
+        used[i][j] = 1
+        cnt = 1
 
-    color = lst[y][x]
-    cnt = 1
+        while q:
+            nq = []
 
-    used[y][x] = 1
+            for y, x in q:
+                for dy, dx in directions:
+                    ny, nx = y + dy, x + dx
+                    if 0 <= ny < N and 0 <= nx < M and not used[ny][nx] and lst[ny][nx] == lst[i][j]:
+                        used[ny][nx] = 1
+                        cnt += 1
+                        nq.append((ny, nx))
+            
+            q = nq
 
-    while q:
-        nowy, nowx = q.popleft()
+        if lst[i][j] == 'W':
+            W += cnt ** 2
+        else:
+            B += cnt ** 2
 
-        for dy, dx in ((0, 1), (1, 0), (0, -1), (-1, 0)):
-            ny, nx = nowy + dy, nowx + dx
-            if 0 <= ny < M and 0 <= nx < N and not used[ny][nx] and lst[ny][nx] == color:
-                q.append((ny, nx))
-                cnt += 1
-                used[ny][nx] = 1
 
-    return cnt ** 2
-
-for m in range(M):
-    for n in range(N):
-        if not used[m][n]:
-            cnt = bfs(m, n)
-
-            if lst[m][n] == 'W':
-                white += cnt
-            else:
-                blue += cnt
-
-print(white, blue)
+print(W, B)
