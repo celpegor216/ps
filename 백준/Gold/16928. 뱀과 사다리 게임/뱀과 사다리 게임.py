@@ -1,35 +1,41 @@
-from collections import deque
+N = 100
+board = [x for x in range(N + 1)]
+
+L, S = map(int, input().split())
+
+for _ in range(L + S):
+    x, y = map(int, input().split())
+    board[x] = y
 
 
-N, M = map(int, input().split())
-MAX = 100
-board = [n for n in range(MAX + 1)]
+def find(start):
+    used = [0] * (N + 1)
+    used[start] = 1
 
-for _ in range(N + M):
-    a, b = map(int, input().split())
-    board[a] = b
-
-def find():
-    q = deque()
-    q.append(1)
-
-    used = [0] * (MAX + 1)
-    used[1] = 1
+    q = [start]
 
     result = 0
     while q:
-        for _ in range(len(q)):
-            now = q.popleft()
+        nq = []
 
-            if now == MAX:
+        for now in q:
+            if now == N:
                 return result
 
             for i in range(1, 7):
                 nxt = now + i
-                if nxt <= MAX and not used[nxt]:
-                    used[nxt] = 1
-                    q.append(board[nxt])
+                if nxt > N:
+                    continue
+                nxt = board[nxt]
 
+                if used[nxt]:
+                    continue
+                    
+                used[nxt] = 1
+                nq.append(nxt)
+        
+        q = nq
         result += 1
+    
 
-print(find())
+print(find(1))
