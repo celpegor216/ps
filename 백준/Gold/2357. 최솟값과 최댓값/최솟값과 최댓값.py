@@ -1,46 +1,52 @@
-# 세그먼트 트리
-# 시간 초과 -> 매번 트리를 생성하지 않고 미리 트리를 만들어둬야함
-# 해답: https://squareyun.tistory.com/103
-
-import math
 import sys
 input = sys.stdin.readline
 
 N, M = map(int, input().split())
 lst = [int(input()) for _ in range(N)]
 
-h = math.ceil(math.log2(N)) + 1
-memo = [0] * (1 << h)
+min_tree = [0] * 4 * N
+max_tree = [0] * 4 * N
 
-def segment_tree(idx, left, right):
-    if left == right:
-        memo[idx] = (lst[left], lst[left])
-    else:
-        middle = (left + right) // 2
 
-        tmpl = segment_tree(idx * 2, left, middle)
-        tmpr = segment_tree(idx * 2 + 1, middle + 1, right)
+def update_tree(tree_idx, start, end):
+    if not min_tree[tree_idx] or not max_tree[tree_idx]:
+        # 리프 노드까지 내려온 경우
+        if start == end:
+            min_tree[tree_idx] = lst[start]
+            max_tree[tree_idx] = lst[start]
+        else:
+            middle = (start + end) // 2
 
-        memo[idx] = (min(tmpl[0], tmpr[0]), max(tmpl[1], tmpr[1]))
-    return memo[idx]
+            left = update_tree(tree_idx * 2, start, middle)
+            right = update_tree(tree_idx * 2 + 1, middle + 1, end)
 
-segment_tree(1, 0, N - 1)
+            min_tree[tree_idx] = min(left[0], right[0])
+            max_tree[tree_idx] = max(left[1], right[1])
+    return min_tree[tree_idx], max_tree[tree_idx]
 
-def find(idx, start, end, left, right):
-    if start > right or end < left:
-        return (10 ** 9 + 1, 0)
+
+update_tree(1, 0, N - 1)
+
+
+def find_tree(tree_idx, target_start, target_end, now_start, now_end):
+    # 현재 범위가 타겟 범위를 벗어난 경우
+    if target_end < now_start or now_end < target_start:
+        return (21e8, -21e8)
+
+    # 리프 노드까지 왔거나, 현재 범위가 타겟 범위 내부인 경우
+    if now_start == now_end or (target_start <= now_start and now_end <= target_end):
+        return min_tree[tree_idx], max_tree[tree_idx]
     
-    if start <= left and right <= end:
-        return memo[idx]
-    
-    middle = (left + right) // 2
-    
-    tmpl = find(idx * 2, start, end, left, middle)
-    tmpr = find(idx * 2 + 1, start, end, middle + 1, right)
+    middle = (now_start + now_end) // 2
 
-    return (min(tmpl[0], tmpr[0]), max(tmpl[1], tmpr[1]))
+    left = find_tree(tree_idx * 2, target_start, target_end, now_start, middle)
+    right = find_tree(tree_idx * 2 + 1, target_start, target_end, middle + 1, now_end)
 
-for m in range(M):
-    a, b = map(int, input().split())
+    return min(left[0], right[0]), max(left[1], right[1])
 
-    print(*find(1, a - 1, b - 1, 0, N - 1))
+
+for _ in range(M):
+    # a부터 b까지니까 a < b가 보장된듯?
+    a, b = map(lambda x: int(x) - 1, input().split())
+
+    print(*find_tree(1, a, b, 0, N - 1))
